@@ -75,9 +75,13 @@ function App({ page = "dashboard" }) {
 
   // 🔄 realtime
   useEffect(() => {
+    console.log("Setting up Firestore listener");
     const unsubscribe = onSnapshot(collection(db, "airdrops"), (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      console.log("Received data from Firestore:", data);
       setAirdrops(data);
+    }, (error) => {
+      console.error("Firestore listener error:", error);
     });
     return unsubscribe;
   }, []);
@@ -178,17 +182,24 @@ function App({ page = "dashboard" }) {
   };
 
   const toggleDailyComplete = async (id) => {
+    console.log("Toggle daily complete for ID:", id);
     const airdrop = airdrops.find(a => a.id === id);
-    if (!airdrop) return;
+    if (!airdrop) {
+      console.log("Airdrop not found");
+      return;
+    }
 
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = airdrop.lastCompleted === today;
     const newLastCompleted = isCompletedToday ? null : new Date().toISOString();
 
+    console.log("Current lastCompleted:", airdrop.lastCompleted, "Today:", today, "Is completed today:", isCompletedToday, "New value:", newLastCompleted);
+
     try {
       await updateDoc(doc(db, "airdrops", id), {
         lastCompleted: newLastCompleted
       });
+      console.log("Firestore update successful");
     } catch (error) {
       console.error("Error updating completion: ", error);
     }
