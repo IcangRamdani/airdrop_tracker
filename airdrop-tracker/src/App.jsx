@@ -43,9 +43,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-console.log("Firebase initialized:", app);
-console.log("Firestore db:", db);
-
 function App({ page = "dashboard" }) {
   const [airdrops, setAirdrops] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -406,10 +403,7 @@ function App({ page = "dashboard" }) {
                 <div className="flex items-center justify-between mb-3">
                   <h4 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{a.name}</h4>
                   <button
-                    onClick={() => {
-                      console.log("Daily toggle button clicked for ID:", a.id);
-                      toggleDailyComplete(a.id);
-                    }}
+                    onClick={() => toggleDailyComplete(a.id)}
                     className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                       isCompletedToday(a) 
                         ? 'bg-green-500 border-green-500 text-white' 
