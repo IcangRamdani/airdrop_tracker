@@ -191,7 +191,7 @@ function App({ page = "dashboard" }) {
 
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = airdrop.lastCompleted === today;
-    const newLastCompleted = isCompletedToday ? null : new Date().toISOString();
+    const newLastCompleted = isCompletedToday ? null : today;
 
     console.log("Current lastCompleted:", airdrop.lastCompleted, "Today:", today, "Is completed today:", isCompletedToday, "New value:", newLastCompleted);
 
