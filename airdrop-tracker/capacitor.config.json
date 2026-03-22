@@ -1,0 +1,13 @@
+{
+  "appId": "com.airdroptracker.app",
+  "appName": "Airdrop Tracker",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

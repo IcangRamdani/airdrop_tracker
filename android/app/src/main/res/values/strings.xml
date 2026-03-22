@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Airdrop Tracker</string>
+    <string name="title_activity_main">Airdrop Tracker</string>
+    <string name="package_name">com.icang.airdrop</string>
+    <string name="custom_url_scheme">com.icang.airdrop</string>
+</resources>
