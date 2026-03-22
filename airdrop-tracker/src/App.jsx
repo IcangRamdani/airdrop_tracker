@@ -341,6 +341,7 @@ function App({ page = "dashboard" }) {
   const fileInputRef = useRef(null);
   const localWalletCacheRef = useRef([]);
   const walletMigrationStateRef = useRef("idle");
+  const deadlineNotificationRef = useRef(new Set());
 
   const activeTab = page === "dashboard" ? "All" : page;
   const isAnalytics = page === "analytics";
@@ -587,20 +588,42 @@ function App({ page = "dashboard" }) {
   // notif deadline
   useEffect(() => {
     const checkDeadlines = () => {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+
       const now = new Date();
+      const activeNotificationKeys = new Set();
+
       airdrops.forEach((a) => {
         if (a.deadline && a.status !== "Selesai") {
           const d = new Date(a.deadline);
           const diff = (d - now) / (1000 * 60 * 60);
+          const notificationKey = `${a.wallet || "all"}:${a.id}:${a.deadline}`;
+
           if (diff > 0 && diff <= 24) {
-            new Notification(`${a.name} hampir habis!`, {
-              body: `Deadline: ${d.toLocaleDateString()}`,
-              icon: "/vite.svg",
-            });
+            activeNotificationKeys.add(notificationKey);
+
+            if (!deadlineNotificationRef.current.has(notificationKey)) {
+              new Notification(`${a.name} hampir habis!`, {
+                body: `Deadline: ${d.toLocaleDateString()}`,
+                icon: "/vite.svg",
+              });
+              deadlineNotificationRef.current.add(notificationKey);
+            }
           }
         }
       });
+
+      deadlineNotificationRef.current.forEach((notificationKey) => {
+        if (!activeNotificationKeys.has(notificationKey)) {
+          deadlineNotificationRef.current.delete(notificationKey);
+        }
+      });
     };
+
+    checkDeadlines();
+
     const interval = setInterval(checkDeadlines, 60000);
     return () => clearInterval(interval);
   }, [airdrops]);
@@ -652,24 +675,17 @@ function App({ page = "dashboard" }) {
 
   const toggleDailyComplete = async (id) => {
     if (selectedWallet === "All") return;
-    console.log("Toggle daily complete for ID:", id);
     const airdrop = airdrops.find(a => a.id === id);
-    if (!airdrop) {
-      console.log("Airdrop not found");
-      return;
-    }
+    if (!airdrop) return;
 
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = airdrop.lastCompleted === today;
     const newLastCompleted = isCompletedToday ? null : today;
 
-    console.log("Current lastCompleted:", airdrop.lastCompleted, "Today:", today, "Is completed today:", isCompletedToday, "New value:", newLastCompleted);
-
     try {
       await updateDoc(doc(getWalletCollection(selectedWallet), id), {
         lastCompleted: newLastCompleted
       });
-      console.log("Firestore update successful");
     } catch (error) {
       console.error("Error updating completion: ", error);
     }
@@ -708,7 +724,6 @@ function App({ page = "dashboard" }) {
   const saveAutoBackup = () => {
     try {
       localStorage.setItem("airdrops_auto_backup", JSON.stringify(buildBackupPayload()));
-      console.log("Auto-backup saved in localStorage");
     } catch (e) {
       console.error("Auto-backup failed", e);
     }
@@ -846,14 +861,26 @@ function App({ page = "dashboard" }) {
 
   const isFormBlocked = loading || readOnlyMode;
 
+  const completedCount = airdrops.filter((a) => a.status === "Selesai").length;
+  const inProgressCount = airdrops.filter((a) => a.status === "Proses").length;
+  const pendingCount = airdrops.filter((a) => a.status === "Belum").length;
+  const dailyTaskCount = airdrops.filter((a) => a.frequency === "Daily").length;
+  const dailyCompletedCount = airdrops.filter((a) => a.frequency === "Daily" && isCompletedToday(a)).length;
+  const progressScore = airdrops.reduce((total, a) => {
+    if (a.status === "Selesai") return total + 1;
+    if (a.frequency === "Daily" && isCompletedToday(a)) return total + 1;
+    if (a.status === "Proses") return total + 0.5;
+    return total;
+  }, 0);
+
   const stats = {
     total: airdrops.length,
-    completed: airdrops.filter(a => a.status === "Selesai").length,
-    inProgress: airdrops.filter(a => a.status === "Proses").length,
-    pending: airdrops.filter(a => a.status === "Belum").length,
-    dailyTasks: airdrops.filter(a => a.frequency === 'Daily').length,
-    dailyCompleted: airdrops.filter(a => a.frequency === 'Daily' && isCompletedToday(a)).length,
-    completionRate: airdrops.length ? Math.round((airdrops.filter(a => a.status === "Selesai").length / airdrops.length) * 100) : 0,
+    completed: completedCount,
+    inProgress: inProgressCount,
+    pending: pendingCount,
+    dailyTasks: dailyTaskCount,
+    dailyCompleted: dailyCompletedCount,
+    completionRate: airdrops.length ? Math.round((progressScore / airdrops.length) * 100) : 0,
   };
 
   const getColor = (a, darkMode) => {
@@ -1048,10 +1075,10 @@ function App({ page = "dashboard" }) {
         <div className={`mb-8 p-5 rounded-3xl ${darkMode ? 'bg-slate-900/55 border border-slate-700/80' : 'bg-white/85 border border-white'} shadow-xl backdrop-blur-xl`}>
           <div className="flex items-center justify-between mb-2">
             <div className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Kekuatan Pencapaian</div>
-            <div className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{stats.completionRate}% completed</div>
+            <div className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{stats.completionRate}% progress</div>
           </div>
           <div className={`w-full h-2 rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
-            <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-teal-500" style={{ width: `${stats.completionRate}%` }} />
+            <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-teal-500 transition-all duration-500 ease-out" style={{ width: `${stats.completionRate}%` }} />
           </div>
         </div>
 
