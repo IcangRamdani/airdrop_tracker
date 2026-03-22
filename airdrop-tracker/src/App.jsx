@@ -26,11 +26,9 @@ import {
   FunnelIcon,
   ChartBarIcon,
   CalendarIcon,
-  TagIcon,
   PencilIcon,
   DocumentDuplicateIcon,
   ArrowPathIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 // 🔥 CONFIG FIREBASE (ISI PUNYA KAMU)
@@ -59,6 +57,64 @@ const normalizeWallets = (items = []) =>
         .filter(Boolean)
     )
   );
+const emptyFormState = {
+  name: "",
+  task: "",
+  link: "",
+  deadline: "",
+  status: "Belum",
+  priority: "Medium",
+  category: "General",
+  notes: "",
+  frequency: "One-time",
+  lastCompleted: null,
+};
+const formatDisplayDate = (value) =>
+  value ? new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-";
+
+const SectionCard = ({ darkMode, className = "", children }) => (
+  <div
+    className={`${darkMode ? "bg-slate-900/55 border-slate-700/80 shadow-slate-950/30" : "bg-white/85 border-white shadow-slate-200/80"} rounded-3xl border p-5 md:p-6 shadow-xl backdrop-blur-xl ${className}`}
+  >
+    {children}
+  </div>
+);
+
+const SectionHeading = ({ darkMode, eyebrow, title, description, action }) => (
+  <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      {eyebrow && (
+        <div className={`mb-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${darkMode ? "bg-slate-800 text-cyan-200" : "bg-sky-100 text-sky-700"}`}>
+          {eyebrow}
+        </div>
+      )}
+      <h2 className={`text-2xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>{title}</h2>
+      {description && <p className={`mt-1 text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{description}</p>}
+    </div>
+    {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+  </div>
+);
+
+const ActionIconButton = ({ onClick, title, children, tone = "slate", disabled = false }) => {
+  const toneMap = {
+    success: disabled ? "bg-slate-500/30 text-slate-300" : "bg-emerald-500 text-white hover:bg-emerald-400",
+    primary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-sky-500 text-white hover:bg-sky-400",
+    secondary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-violet-500 text-white hover:bg-violet-400",
+    danger: disabled ? "bg-slate-500/30 text-slate-300" : "bg-rose-500 text-white hover:bg-rose-400",
+    slate: disabled ? "bg-slate-500/30 text-slate-300" : "bg-slate-800/80 text-white hover:bg-slate-700",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      disabled={disabled}
+      className={`inline-flex items-center justify-center rounded-2xl p-3 transition-all duration-200 ${toneMap[tone]} ${disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5"}`}
+    >
+      {children}
+    </button>
+  );
+};
 
 const StatusBadge = ({ status }) => {
   const classes = status === "Selesai" ? 'bg-green-100 text-green-800' : status === "Proses" ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
@@ -74,7 +130,7 @@ const FrequencyBadge = ({ frequency }) => (
   <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">{frequency}</span>
 );
 
-const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onToggleStatus, isCompletedToday }) => (
+const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onToggleStatus, isCompletedToday, readOnly }) => (
   <motion.div
     layout
     initial={{ opacity: 0, scale: 0.8 }}
@@ -134,6 +190,136 @@ const DailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isCompleted
   </motion.div>
 );
 
+const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onToggleStatus, isCompletedToday, readOnly }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, scale: 0.96 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.96 }}
+    transition={{ duration: 0.25 }}
+    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/80' : 'border-white'} group h-full rounded-3xl border p-5 shadow-xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
+  >
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="mb-3 flex flex-wrap gap-2">
+            <StatusBadge status={a.status} />
+            <PriorityBadge priority={a.priority} />
+            <FrequencyBadge frequency={a.frequency} />
+            {isCompletedToday(a) && (
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-emerald-500/15 text-emerald-200' : 'bg-emerald-100 text-emerald-700'}`}>
+                Selesai hari ini
+              </span>
+            )}
+          </div>
+          <h3 className={`truncate text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h3>
+          <p className={`mt-2 text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.task}</p>
+        </div>
+        <ActionIconButton
+          onClick={() => onToggleStatus(a.id)}
+          title={a.status === 'Selesai' ? 'Tandai sebagai Proses' : 'Tandai sebagai Selesai'}
+          tone="success"
+          disabled={readOnly}
+        >
+          <CheckBadgeIcon className="h-4 w-4" />
+        </ActionIconButton>
+      </div>
+
+      <div className={`${darkMode ? 'bg-slate-950/35 border-white/10 text-slate-300' : 'bg-white/55 border-white/70 text-slate-600'} rounded-2xl border p-4`}>
+        <div className="grid gap-2 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-medium">Deadline</span>
+            <span>{a.deadline ? formatDisplayDate(a.deadline) : 'Belum diatur'}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-medium">Wallet</span>
+            <span className="truncate text-right">{a.wallet || 'Belum dipilih'}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-medium">Kategori</span>
+            <span>{a.category || 'General'}</span>
+          </div>
+          {a.link && (
+            <div className="flex items-start justify-between gap-3">
+              <span className="font-medium">Link</span>
+              <a href={a.link} target="_blank" rel="noreferrer" className={`max-w-[65%] truncate text-right font-medium underline underline-offset-4 ${darkMode ? 'text-cyan-300 decoration-cyan-400/40' : 'text-sky-700 decoration-sky-400/40'}`}>
+                {a.link}
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {a.notes && (
+        <div className={`${darkMode ? 'bg-slate-950/25 border-white/10' : 'bg-white/55 border-white/60'} rounded-2xl border p-4`}>
+          <div className={`mb-1 text-xs font-semibold uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Catatan</div>
+          <p className={`text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.notes}</p>
+        </div>
+      )}
+
+      <div className="mt-auto grid grid-cols-3 gap-2 sm:grid-cols-4">
+        <ActionIconButton onClick={() => onEdit(a)} title="Edit airdrop" tone="primary" disabled={readOnly}>
+          <PencilIcon className="h-4 w-4" />
+        </ActionIconButton>
+        <ActionIconButton onClick={() => onDuplicate(a)} title="Duplikat airdrop" tone="secondary" disabled={readOnly}>
+          <DocumentDuplicateIcon className="h-4 w-4" />
+        </ActionIconButton>
+        <ActionIconButton onClick={() => onRemove(a.id)} title="Hapus airdrop" tone="danger" disabled={readOnly}>
+          <TrashIcon className="h-4 w-4" />
+        </ActionIconButton>
+        <div className={`col-span-3 hidden items-center justify-end text-xs font-medium ${darkMode ? 'text-slate-300' : 'text-slate-600'} sm:flex sm:col-span-1`}>
+          {readOnly ? 'Pilih wallet untuk edit' : 'Siap dikelola'}
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const PolishedDailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isCompletedToday, readOnly }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.96 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.25 }}
+    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/80' : 'border-white'} rounded-3xl border p-5 shadow-xl backdrop-blur-xl`}
+  >
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <div className="mb-2 flex flex-wrap gap-2">
+          <FrequencyBadge frequency={a.frequency} />
+          {a.wallet && (
+            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-white/15 text-white/80' : 'bg-white/70 text-slate-700'}`}>
+              {a.wallet}
+            </span>
+          )}
+        </div>
+        <h4 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h4>
+      </div>
+      <button
+        onClick={() => toggleDailyComplete(a.id)}
+        disabled={readOnly}
+        className={`flex h-11 w-11 items-center justify-center rounded-2xl border-2 transition-all ${
+          isCompletedToday(a)
+            ? 'border-emerald-400 bg-emerald-500 text-white'
+            : darkMode
+              ? 'border-slate-500 text-slate-100 hover:border-emerald-400'
+              : 'border-slate-300 text-slate-600 hover:border-emerald-500'
+        } ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
+      >
+        {isCompletedToday(a) ? <CheckCircleIcon className="h-5 w-5" /> : <CheckCircleIcon className="h-5 w-5 opacity-40" />}
+      </button>
+    </div>
+    <div className={`${darkMode ? 'bg-slate-950/25 border-white/10' : 'bg-white/55 border-white/60'} mt-4 rounded-2xl border p-4`}>
+      <p className={`text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.task}</p>
+    </div>
+    <div className="mt-4 flex items-center justify-between gap-3">
+      <span className={`text-sm font-semibold ${isCompletedToday(a) ? 'text-emerald-300' : darkMode ? 'text-amber-200' : 'text-orange-600'}`}>
+        {isCompletedToday(a) ? 'Sudah dikerjakan hari ini' : 'Belum dikerjakan hari ini'}
+      </span>
+      {readOnly && <span className={`text-xs ${darkMode ? 'text-slate-300' : 'text-slate-500'}`}>Pilih wallet untuk update</span>}
+    </div>
+  </motion.div>
+);
+
 function App({ page = "dashboard" }) {
   const [airdrops, setAirdrops] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -145,7 +331,6 @@ function App({ page = "dashboard" }) {
   const [filterPriority, setFilterPriority] = useState("All");
   const [sortBy, setSortBy] = useState("deadline");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [showUrgentOnly, setShowUrgentOnly] = useState(false);
   const [wallets, setWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState("All");
   const [newWallet, setNewWallet] = useState("");
@@ -163,20 +348,13 @@ function App({ page = "dashboard" }) {
   const isSettings = page === "settings";
   const syncMessages = [walletSyncError, airdropSyncError].filter(Boolean);
   const isFirebaseConnected = isWalletSyncReady && syncMessages.length === 0;
+  const readOnlyMode = selectedWallet === "All";
+  const fieldClass = `${darkMode ? 'bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 focus:ring-cyan-500/30' : 'bg-white border-slate-200 text-slate-700 placeholder:text-slate-400 focus:ring-sky-500/20'} w-full rounded-2xl border px-4 py-3 focus:outline-none focus:ring-4 transition-all`;
+  const mutedPanelClass = darkMode ? 'bg-slate-950/30 border-white/10' : 'bg-slate-50 border-slate-200';
+  const softTextClass = darkMode ? 'text-slate-300' : 'text-slate-600';
+  const emptyForm = () => ({ ...emptyFormState });
 
-
-  const [form, setForm] = useState({
-    name: "",
-    task: "",
-    link: "",
-    deadline: "",
-    status: "Belum",
-    priority: "Medium",
-    category: "General",
-    notes: "",
-    frequency: "One-time",
-    lastCompleted: null,
-  });
+  const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -432,18 +610,7 @@ function App({ page = "dashboard" }) {
     setLoading(true);
     try {
       await addDoc(getWalletCollection(selectedWallet), form);
-      setForm({
-        name: "",
-        task: "",
-        link: "",
-        deadline: "",
-        status: "Belum",
-        priority: "Medium",
-        category: "General",
-        notes: "",
-        frequency: "One-time",
-        lastCompleted: null,
-      });
+      setForm(emptyForm());
       setShowForm(false);
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -457,18 +624,7 @@ function App({ page = "dashboard" }) {
     try {
       await updateDoc(doc(getWalletCollection(selectedWallet), editingId), form);
       setEditingId(null);
-      setForm({
-        name: "",
-        task: "",
-        link: "",
-        deadline: "",
-        status: "Belum",
-        priority: "Medium",
-        category: "General",
-        notes: "",
-        frequency: "One-time",
-        lastCompleted: null,
-      });
+      setForm(emptyForm());
       setShowForm(false);
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -641,9 +797,7 @@ function App({ page = "dashboard" }) {
 
       const matchesWallet = selectedWallet === "All" || (a.wallet && a.wallet === selectedWallet);
 
-      const isUrgent = a.deadline && a.status !== "Selesai" && (new Date(a.deadline) - new Date()) / (1000 * 60 * 60) <= 24 && (new Date(a.deadline) - new Date()) > 0;
-
-      return matchesSearch && matchesStatus && matchesPriority && matchesTab && matchesWallet && (!showUrgentOnly || isUrgent);
+      return matchesSearch && matchesStatus && matchesPriority && matchesTab && matchesWallet;
     })
     .sort((a, b) => {
       if (sortBy === "priority") {
@@ -662,6 +816,35 @@ function App({ page = "dashboard" }) {
   if (sortOrder === "desc") {
     filteredAirdrops.reverse();
   }
+
+  const hasActiveFilters =
+    searchTerm.trim() !== "" ||
+    filterStatus !== "All" ||
+    filterPriority !== "All" ||
+    sortBy !== "deadline" ||
+    sortOrder !== "asc";
+
+  const resetControls = () => {
+    setSearchTerm("");
+    setFilterStatus("All");
+    setFilterPriority("All");
+    setSortBy("deadline");
+    setSortOrder("asc");
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm());
+  };
+
+  const openEditForm = (airdrop) => {
+    setEditingId(airdrop.id);
+    setForm({ ...emptyForm(), ...airdrop });
+    setShowForm(true);
+  };
+
+  const isFormBlocked = loading || readOnlyMode;
 
   const stats = {
     total: airdrops.length,
@@ -702,13 +885,13 @@ function App({ page = "dashboard" }) {
           {/* 👛 Wallet Selector - Visible on main header */}
           <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-slate-800/60 border border-slate-700' : 'bg-white/60 border border-gray-200'}`}>
             <div className="flex flex-col md:flex-row gap-3 items-center justify-center flex-wrap">
-              <label className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>👛 Pilih Wallet:</label>
+              <label className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Wallet Aktif:</label>
               <select
                 value={selectedWallet}
                 onChange={(e) => setSelectedWallet(e.target.value)}
                 className={`px-4 py-2 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-400' : 'bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400'} focus:outline-none transition-all`}
               >
-                <option value="All">📋 Semua Wallet (View Only)</option>
+                <option value="All">Semua Wallet (lihat saja)</option>
                 {wallets.map((w) => (
                   <option key={w} value={w}>{w}</option>
                 ))}
@@ -737,8 +920,14 @@ function App({ page = "dashboard" }) {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+              onClick={() => {
+                if (!readOnlyMode) {
+                  setShowForm(true);
+                }
+              }}
+              disabled={readOnlyMode}
+              title={readOnlyMode ? "Pilih wallet spesifik untuk menambah airdrop" : "Tambah airdrop"}
+              className={`p-3 rounded-full shadow-lg transition-all duration-300 ${readOnlyMode ? 'bg-slate-400 text-white cursor-not-allowed opacity-60' : 'bg-gradient-to-r from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 text-white hover:scale-110'}`}
             >
               <PlusIcon className="w-6 h-6" />
             </motion.button>
@@ -788,13 +977,13 @@ function App({ page = "dashboard" }) {
             <div className="flex items-start gap-3">
               <ExclamationTriangleIcon className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-bold text-orange-900 mb-1">🔑 Tambah Wallet Terlebih Dahulu</h3>
+                <h3 className="font-bold text-orange-900 mb-1">Tambahkan wallet terlebih dahulu</h3>
                 <p className="text-sm text-orange-800 mb-3">Anda belum menambahkan wallet apapun. Tambahkan wallet di menu <strong>Backup</strong> untuk mulai melacak airdrop.</p>
                 <NavLink
                   to="/settings"
                   className="inline-block px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-all"
                 >
-                  ➜ Buka Menu Backup
+                  Buka Backup
                 </NavLink>
               </div>
             </div>
@@ -811,7 +1000,7 @@ function App({ page = "dashboard" }) {
             <div className="flex items-start gap-3">
               <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-bold text-blue-900 mb-1">📋 Mode Tampilan Semua Wallet</h3>
+                <h3 className="font-bold text-blue-900 mb-1">Tampilan semua wallet</h3>
                 <p className="text-sm text-blue-800">Anda sedang melihat <strong>semua wallet</strong>. Untuk menambah atau mengedit data, silakan pilih wallet spesifik di atas. Data yang ditampilkan adalah read-only.</p>
               </div>
             </div>
@@ -836,21 +1025,25 @@ function App({ page = "dashboard" }) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`${darkMode ? 'bg-slate-800/50 backdrop-blur-sm border-slate-700' : 'bg-white/80 backdrop-blur-sm border-white'} shadow-xl rounded-2xl p-4 border text-center`}
+              className={`${darkMode ? 'bg-slate-900/55 border-slate-700/80' : 'bg-white/85 border-white'} flex items-start gap-3 rounded-3xl border p-4 shadow-xl backdrop-blur-xl`}
             >
-              <stat.icon className={`w-8 h-8 mx-auto mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
-              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{stat.value}</div>
-              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{stat.label}</div>
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r ${stat.color}`}>
+                <stat.icon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className={`text-sm font-medium uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</div>
+                <div className={`mt-1 text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{stat.value}</div>
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        <div className={`mb-8 p-4 rounded-2xl ${darkMode ? 'bg-slate-800/55 border border-slate-700' : 'bg-white/80 border border-gray-200'} shadow-lg`}>
+        <div className={`mb-8 p-5 rounded-3xl ${darkMode ? 'bg-slate-900/55 border border-slate-700/80' : 'bg-white/85 border border-white'} shadow-xl backdrop-blur-xl`}>
           <div className="flex items-center justify-between mb-2">
-            <div className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Kekuatan Pencapaian</div>
-            <div className={`text-sm font-bold ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{stats.completionRate}% Completed</div>
+            <div className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Kekuatan Pencapaian</div>
+            <div className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{stats.completionRate}% completed</div>
           </div>
-          <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+          <div className={`w-full h-2 rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
             <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-teal-500" style={{ width: `${stats.completionRate}%` }} />
           </div>
         </div>
@@ -860,13 +1053,22 @@ function App({ page = "dashboard" }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className={`${darkMode ? 'bg-slate-800/60' : 'bg-white/70'} rounded-2xl p-4 mb-8 border border-dashed`}
+            className="mb-8"
           >
-            <h2 className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>📊 Analytics</h2>
-            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total airdrop: {stats.total}</p>
-            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Completed: {stats.completed}, In-progress: {stats.inProgress}, Pending: {stats.pending}</p>
-            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Daily done: {stats.dailyCompleted}/{stats.dailyTasks}</p>
-            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Urgent (deadline 24h): {airdrops.filter(a => a.deadline && a.status !== 'Selesai' && (new Date(a.deadline)-new Date())/(1000*60*60) <= 24 && (new Date(a.deadline)-new Date()) > 0).length}</p>
+            <SectionCard darkMode={darkMode}>
+              <SectionHeading
+                darkMode={darkMode}
+                eyebrow="Overview"
+                title="Analytics"
+                description="Ringkasan cepat performa progress airdrop saat ini."
+              />
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className={`${mutedPanelClass} rounded-2xl border p-4 ${softTextClass}`}>Total airdrop: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{stats.total}</strong></div>
+                <div className={`${mutedPanelClass} rounded-2xl border p-4 ${softTextClass}`}>Selesai / Proses / Pending: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{stats.completed} / {stats.inProgress} / {stats.pending}</strong></div>
+                <div className={`${mutedPanelClass} rounded-2xl border p-4 ${softTextClass}`}>Daily done: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{stats.dailyCompleted}/{stats.dailyTasks}</strong></div>
+                <div className={`${mutedPanelClass} rounded-2xl border p-4 ${softTextClass}`}>Deadline 24 jam: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{airdrops.filter(a => a.deadline && a.status !== 'Selesai' && (new Date(a.deadline)-new Date())/(1000*60*60) <= 24 && (new Date(a.deadline)-new Date()) > 0).length}</strong></div>
+              </div>
+            </SectionCard>
           </motion.div>
         )}
 
@@ -875,12 +1077,23 @@ function App({ page = "dashboard" }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className={`${darkMode ? 'bg-slate-800/60' : 'bg-white/70'} rounded-2xl p-4 mb-8 border border-dashed`}
+            className="mb-8"
           >
-            <h2 className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>🏷️ Categories</h2>
-            {Array.from(new Set(airdrops.map(a => a.category || 'General'))).map((cat) => (
-              <span key={cat} className="inline-block px-3 py-1 mr-2 mb-2 rounded-full bg-indigo-100 text-indigo-700 text-sm">{cat} ({airdrops.filter(a => (a.category||'General') === cat).length})</span>
-            ))}
+            <SectionCard darkMode={darkMode}>
+              <SectionHeading
+                darkMode={darkMode}
+                eyebrow="Grouping"
+                title="Kategori"
+                description="Lihat distribusi airdrop berdasarkan kategori yang paling sering dipakai."
+              />
+              <div className="flex flex-wrap gap-2">
+                {Array.from(new Set(airdrops.map(a => a.category || 'General'))).map((cat) => (
+                  <span key={cat} className={`${darkMode ? 'bg-slate-800 text-cyan-200' : 'bg-sky-100 text-sky-700'} rounded-full px-3 py-2 text-sm font-semibold`}>
+                    {cat} ({airdrops.filter(a => (a.category||'General') === cat).length})
+                  </span>
+                ))}
+              </div>
+            </SectionCard>
           </motion.div>
         )}
 
@@ -889,48 +1102,62 @@ function App({ page = "dashboard" }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className={`${darkMode ? 'bg-slate-800/60' : 'bg-white/70'} rounded-2xl p-4 mb-8 border border-dashed`}
+            className="mb-8"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🗄️ Backup & Wallet</h2>
-              <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{wallets.length} wallet(s) tersimpan</span>
-            </div>
-            <div className={`mb-4 rounded-lg border px-3 py-2 text-sm ${isFirebaseConnected ? (darkMode ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700') : (darkMode ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-700')}`}>
-              {!isWalletSyncReady && "Status Firebase: menghubungkan..."}
-              {isWalletSyncReady && isFirebaseConnected && "Status Firebase: tersambung dan siap sinkron."}
-              {syncMessages.map((message) => (
-                <div key={`settings-${message}`}>{message}</div>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 mb-4">
-              <label className={`${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold`}>Pilih Wallet Aktif:</label>
-              <select
-                value={selectedWallet}
-                onChange={(e) => setSelectedWallet(e.target.value)}
-                className={`px-4 py-2 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-gray-700'}`}
-              >
-                <option value="All">All</option>
-                {wallets.map((w) => (
-                  <option key={w} value={w}>{w}</option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <input
-                type="text"
-                value={newWallet}
-                onChange={(e) => setNewWallet(e.target.value)}
-                placeholder="Tambah wallet baru"
-                className={`col-span-2 w-full p-2 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-gray-700'}`}
+            <SectionCard darkMode={darkMode}>
+              <SectionHeading
+                darkMode={darkMode}
+                eyebrow="Wallet Control"
+                title="Backup dan Wallet"
+                description="Kelola wallet aktif, ekspor/impor data, dan pengaturan backup otomatis dalam satu tempat."
+                action={
+                  <span className={`rounded-full px-3 py-2 text-sm font-semibold ${darkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'}`}>
+                    {wallets.length} wallet
+                  </span>
+                }
               />
-              <button onClick={addWallet} className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-semibold">Tambahkan</button>
-            </div>
-            <div className="space-y-2">
-              <div className="flex gap-2 items-center mb-3">
-                <button onClick={exportBackup} className="px-3 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-semibold">Export Backup</button>
+              <div className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${isFirebaseConnected ? (darkMode ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700') : (darkMode ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-700')}`}>
+                {!isWalletSyncReady && "Status Firebase: menghubungkan..."}
+                {isWalletSyncReady && isFirebaseConnected && "Status Firebase: tersambung dan siap sinkron."}
+                {syncMessages.map((message) => (
+                  <div key={`settings-${message}`}>{message}</div>
+                ))}
+              </div>
+              <div className="grid gap-4 md:grid-cols-[1.3fr_1fr]">
+                <div className={`${mutedPanelClass} rounded-2xl border p-4`}>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Wallet aktif</label>
+                  <select
+                    value={selectedWallet}
+                    onChange={(e) => setSelectedWallet(e.target.value)}
+                    className={fieldClass}
+                  >
+                    <option value="All">Semua Wallet</option>
+                    {wallets.map((w) => (
+                      <option key={w} value={w}>{w}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={`${mutedPanelClass} rounded-2xl border p-4`}>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Tambah wallet baru</label>
+                  <div className="grid gap-3">
+                    <input
+                      type="text"
+                      value={newWallet}
+                      onChange={(e) => setNewWallet(e.target.value)}
+                      placeholder="Masukkan alamat wallet"
+                      className={fieldClass}
+                    />
+                    <button onClick={addWallet} className="rounded-2xl bg-sky-500 px-4 py-3 font-semibold text-white transition-all hover:bg-sky-600">
+                      Tambahkan Wallet
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button onClick={exportBackup} className="rounded-2xl bg-indigo-500 px-4 py-3 font-semibold text-white transition-all hover:bg-indigo-600">Export Backup</button>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white font-semibold"
+                  className="rounded-2xl bg-emerald-500 px-4 py-3 font-semibold text-white transition-all hover:bg-emerald-600"
                 >
                   Import Backup
                 </button>
@@ -945,21 +1172,27 @@ function App({ page = "dashboard" }) {
                     if (e.target) e.target.value = "";
                   }}
                 />
-                <label className={`flex items-center gap-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                  <input type="checkbox" checked={autoBackup} onChange={(e) => setAutoBackup(e.target.checked)} className="w-4 h-4" />
+                <label className={`inline-flex items-center gap-2 rounded-2xl px-4 py-3 ${darkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'}`}>
+                  <input type="checkbox" checked={autoBackup} onChange={(e) => setAutoBackup(e.target.checked)} className="h-4 w-4" />
                   Aktifkan Auto Backup 24h
                 </label>
               </div>
-              {wallets.length === 0 && (
-                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>Belum ada wallet terdaftar. Tambahkan untuk melacak airdrop per wallet.</p>
-              )}
-              {wallets.map((address) => (
-                <div key={address} className={`${darkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-white text-gray-700 border-gray-200'} flex items-center justify-between rounded-lg border px-3 py-2`}>
-                  <span className="truncate">{address}</span>
-                  <button onClick={() => removeWallet(address)} className="text-red-500 hover:text-red-700">Hapus</button>
-                </div>
-              ))}
-            </div>
+              <div className="mt-5 space-y-3">
+                {wallets.length === 0 && (
+                  <div className={`${mutedPanelClass} rounded-2xl border border-dashed p-5 text-sm ${softTextClass}`}>
+                    Belum ada wallet terdaftar. Tambahkan wallet untuk mulai melacak airdrop per wallet.
+                  </div>
+                )}
+                {wallets.map((address) => (
+                  <div key={address} className={`${mutedPanelClass} flex items-center justify-between rounded-2xl border px-4 py-3 ${darkMode ? 'text-white' : 'text-slate-700'}`}>
+                    <span className="truncate">{address}</span>
+                    <button onClick={() => removeWallet(address)} className="rounded-full px-3 py-1 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/10">
+                      Hapus
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
           </motion.div>
         )}
 
@@ -970,26 +1203,34 @@ function App({ page = "dashboard" }) {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mb-8"
         >
-          <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>📅 Daily Tasks</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {airdrops.filter(a => a.frequency === 'Daily').map((a) => (
-              <DailyTaskCard
-                key={`daily-${a.id}`}
-                a={a}
-                darkMode={darkMode}
-                getColor={getColor}
-                toggleDailyComplete={toggleDailyComplete}
-                isCompletedToday={isCompletedToday}
-              />
-            ))}
-            {airdrops.filter(a => a.frequency === 'Daily').length === 0 && (
-              <div className={`${darkMode ? 'bg-slate-800/50 text-gray-400' : 'bg-white/50 text-gray-500'} rounded-2xl p-8 text-center border border-dashed`}>
-                <CalendarIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No daily tasks yet</p>
-                <p className="text-sm">Add a daily airdrop to get started!</p>
-              </div>
-            )}
-          </div>
+          <SectionCard darkMode={darkMode}>
+            <SectionHeading
+              darkMode={darkMode}
+              eyebrow="Daily Focus"
+              title="Rutinitas Harian"
+              description="Pantau airdrop yang perlu disentuh setiap hari tanpa harus mencari satu per satu."
+            />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {airdrops.filter(a => a.frequency === 'Daily').map((a) => (
+                <PolishedDailyTaskCard
+                  key={`daily-${a.id}`}
+                  a={a}
+                  darkMode={darkMode}
+                  getColor={getColor}
+                  toggleDailyComplete={toggleDailyComplete}
+                  isCompletedToday={isCompletedToday}
+                  readOnly={readOnlyMode}
+                />
+              ))}
+              {airdrops.filter(a => a.frequency === 'Daily').length === 0 && (
+                <div className={`${mutedPanelClass} rounded-2xl border border-dashed p-8 text-center ${softTextClass}`}>
+                  <CalendarIcon className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                  <p className="font-semibold">Belum ada task harian</p>
+                  <p className="mt-2 text-sm">Tambahkan airdrop dengan frekuensi harian untuk mulai melacak progres.</p>
+                </div>
+              )}
+            </div>
+          </SectionCard>
         </motion.div>
 
         {/* Search & Filter Controls */}
@@ -997,62 +1238,85 @@ function App({ page = "dashboard" }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="flex flex-col xl:flex-row gap-4 mb-8"
+          className={`${darkMode ? 'bg-slate-900/50 border-slate-700/80' : 'bg-white/85 border-white'} mb-8 rounded-3xl border p-4 md:p-5 shadow-xl backdrop-blur-xl`}
         >
-          <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Cari airdrop..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-            />
+          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className={`mb-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${darkMode ? 'bg-slate-800 text-cyan-200' : 'bg-sky-100 text-sky-700'}`}>
+                <FunnelIcon className="h-4 w-4" />
+                Filter Panel
+              </div>
+              <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Cari dan rapikan daftar airdrop</h2>
+              <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Semua kontrol pencarian, status, prioritas, dan urutan ada di satu tempat.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-full px-3 py-2 text-sm font-semibold ${darkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'}`}>
+                {filteredAirdrops.length} hasil
+              </span>
+              <span className={`rounded-full px-3 py-2 text-sm ${darkMode ? 'bg-slate-800/80 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                Urut: {sortBy === "deadline" ? "Deadline" : sortBy === "priority" ? "Prioritas" : "Nama"} {sortOrder === "asc" ? "naik" : "turun"}
+              </span>
+              <button
+                onClick={resetControls}
+                disabled={!hasActiveFilters}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${hasActiveFilters ? (darkMode ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-sky-500 text-white hover:bg-sky-600') : (darkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400')}`}
+              >
+                <ArrowPathIcon className="h-4 w-4" />
+                Reset
+              </button>
+            </div>
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className={`px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-          >
-            <option value="All">Semua Status</option>
-            <option value="Belum">Belum</option>
-            <option value="Proses">Proses</option>
-            <option value="Selesai">Selesai</option>
-          </select>
-          <select
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-            className={`px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-          >
-            <option value="All">Semua Prioritas</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className={`px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-          >
-            <option value="deadline">Urutkan: Deadline</option>
-            <option value="priority">Urutkan: Prioritas</option>
-            <option value="name">Urutkan: Nama</option>
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className={`px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-          <button
-            onClick={() => setShowUrgentOnly(!showUrgentOnly)}
-            className={`px-4 py-3 rounded-xl font-semibold transition-all ${showUrgentOnly ? 'bg-red-500 text-white' : darkMode ? 'bg-slate-700 text-white border border-slate-600' : 'bg-white text-gray-700 border border-gray-200'}`}
-            title="Tampilkan hanya airdrop deadline 24 jam"
-          >
-            <SparklesIcon className="w-4 h-4 inline mr-2" />{showUrgentOnly ? 'Urgent ON' : 'Urgent OFF'}
-          </button>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="relative md:col-span-2 xl:col-span-2">
+              <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cari nama airdrop atau task..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`${fieldClass} pl-11`}
+              />
+            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className={fieldClass}
+            >
+              <option value="All">Semua Status</option>
+              <option value="Belum">Belum</option>
+              <option value="Proses">Proses</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className={fieldClass}
+            >
+              <option value="All">Semua Prioritas</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className={fieldClass}
+              >
+                <option value="deadline">Deadline</option>
+                <option value="priority">Prioritas</option>
+                <option value="name">Nama</option>
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className={fieldClass}
+              >
+                <option value="asc">Naik</option>
+                <option value="desc">Turun</option>
+              </select>
+            </div>
+          </div>
         </motion.div>
 
         {/* Airdrop List */}
@@ -1062,24 +1326,39 @@ function App({ page = "dashboard" }) {
         >
           <AnimatePresence>
             {filteredAirdrops.map((a) => (
-              <AirdropCard
+              <PolishedAirdropCard
                 key={a.id}
                 a={a}
                 darkMode={darkMode}
                 getColor={getColor}
-                onEdit={(airdrop) => {
-                  setEditingId(airdrop.id);
-                  setForm(airdrop);
-                  setShowForm(true);
-                }}
+                onEdit={openEditForm}
                 onDuplicate={duplicate}
                 onRemove={remove}
                 onToggleStatus={toggleStatus}
                 isCompletedToday={isCompletedToday}
+                readOnly={readOnlyMode}
               />
             ))}
           </AnimatePresence>
         </motion.div>
+        {filteredAirdrops.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`${darkMode ? 'bg-slate-900/55 border-slate-700 text-slate-300' : 'bg-white/80 border-slate-200 text-slate-600'} mt-6 rounded-3xl border border-dashed p-8 text-center shadow-lg`}
+          >
+            <FunnelIcon className="mx-auto mb-3 h-10 w-10 opacity-60" />
+            <h3 className={`mb-2 text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Belum ada hasil yang cocok</h3>
+            <p className="mb-4 text-sm">Coba longgarkan pencarian atau reset filter untuk menampilkan semua airdrop lagi.</p>
+            <button
+              onClick={resetControls}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-sky-500 text-white hover:bg-sky-600'}`}
+            >
+              <ArrowPathIcon className="h-4 w-4" />
+              Reset Filter
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Form Modal */}
@@ -1089,122 +1368,145 @@ function App({ page = "dashboard" }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowForm(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-sm"
+            onClick={closeForm}
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-3xl p-4 md:p-8 border shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto`}
+              className={`${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] border p-5 shadow-2xl md:p-8`}
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                {editingId ? 'Edit Airdrop' : 'Tambah Airdrop'}
-              </h2>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nama Airdrop"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                />
-                <textarea
-                  placeholder="Deskripsi Task"
-                  value={form.task}
-                  onChange={(e) => setForm({ ...form, task: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                  rows="3"
-                />
-                <input
-                  type="date"
-                  value={form.deadline}
-                  onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                />
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                >
-                  <option value="Belum">Belum</option>
-                  <option value="Proses">Proses</option>
-                  <option value="Selesai">Selesai</option>
-                </select>
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-                <select
-                  value={form.frequency}
-                  onChange={(e) => setForm({ ...form, frequency: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                >
-                  <option value="One-time">One-time</option>
-                  <option value="Daily">Daily</option>
-                  <option value="Weekly">Weekly</option>
-                </select>
-                <input
-                  type="text"
-                  placeholder="Category (opsional)"
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                />
-                <input
-                  type="text"
-                  placeholder="Link Airdrop (opsional)"
-                  value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                />
-                <textarea
-                  placeholder="Notes (opsional)"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className={`w-full p-3 rounded-xl border-2 focus:outline-none focus:ring-4 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-orange-500' : 'bg-white border-gray-200 focus:ring-orange-500'}`}
-                  rows="2"
-                />
+              <SectionHeading
+                darkMode={darkMode}
+                eyebrow={editingId ? "Edit Mode" : "Airdrop Baru"}
+                title={editingId ? "Perbarui detail airdrop" : "Tambah airdrop baru"}
+                description={readOnlyMode ? "Pilih wallet spesifik lebih dulu agar data bisa disimpan ke Firebase." : `Data akan disimpan ke wallet ${selectedWallet}.`}
+              />
+
+              {readOnlyMode && (
+                <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                  Mode semua wallet bersifat read-only. Pilih wallet spesifik di header atau menu backup sebelum menambah atau mengedit data.
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Nama Airdrop</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Monad Testnet"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={fieldClass}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Deskripsi Task</label>
+                  <textarea
+                    placeholder="Jelaskan langkah yang perlu dilakukan"
+                    value={form.task}
+                    onChange={(e) => setForm({ ...form, task: e.target.value })}
+                    className={fieldClass}
+                    rows="4"
+                  />
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Deadline</label>
+                  <input
+                    type="date"
+                    value={form.deadline}
+                    onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Kategori</label>
+                  <input
+                    type="text"
+                    placeholder="General, Testnet, Social"
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    className={fieldClass}
+                  >
+                    <option value="Belum">Belum</option>
+                    <option value="Proses">Proses</option>
+                    <option value="Selesai">Selesai</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Prioritas</label>
+                  <select
+                    value={form.priority}
+                    onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                    className={fieldClass}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Frekuensi</label>
+                  <select
+                    value={form.frequency}
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                    className={fieldClass}
+                  >
+                    <option value="One-time">One-time</option>
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Link</label>
+                  <input
+                    type="text"
+                    placeholder="https://..."
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
+                    className={fieldClass}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={`mb-2 block text-sm font-semibold ${softTextClass}`}>Catatan</label>
+                  <textarea
+                    placeholder="Tambahan informasi, reward, atau catatan penting"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className={fieldClass}
+                    rows="3"
+                  />
+                </div>
               </div>
-              <div className="flex gap-4 mt-6">
+
+              <div className={`${mutedPanelClass} mt-5 rounded-2xl border px-4 py-3 text-sm ${softTextClass}`}>
+                Wallet tujuan: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{readOnlyMode ? 'Belum dipilih' : selectedWallet}</strong>
+              </div>
+
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button
-                  onClick={editingId ? edit : add}
-                  disabled={loading}
-                  className={`flex-1 py-3 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700'} flex items-center justify-center gap-2`}
+                  onClick={closeForm}
+                  className={`${darkMode ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} rounded-2xl px-5 py-3 font-semibold transition-all duration-200`}
                 >
-                  {loading ? 'Menyimpan...' : (
-                    <>
-                      <PlusIcon className="w-5 h-5" />
-                      {editingId ? 'Update' : 'Tambah'}
-                    </>
-                  )}
+                  Tutup
                 </button>
                 <button
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                    setForm({
-                      name: "",
-                      task: "",
-                      link: "",
-                      deadline: "",
-                      status: "Belum",
-                      priority: "Medium",
-                      category: "General",
-                      notes: "",
-                      frequency: "One-time",
-                      lastCompleted: null,
-                    });
-                  }}
-                  className="px-6 py-3 rounded-xl font-semibold bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200"
+                  onClick={editingId ? edit : add}
+                  disabled={isFormBlocked}
+                  className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-bold text-white transition-all duration-300 ${isFormBlocked ? 'cursor-not-allowed bg-slate-400 opacity-70' : 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 hover:-translate-y-0.5'}`}
                 >
-                  Batal
+                  <PlusIcon className="w-5 h-5" />
+                  {loading ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Tambah Airdrop'}
                 </button>
               </div>
             </motion.div>
