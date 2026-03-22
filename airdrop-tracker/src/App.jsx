@@ -6,6 +6,7 @@ import {
   collection,
   addDoc,
   onSnapshot,
+  setDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -48,6 +49,16 @@ const db = getFirestore(app);
 
 // Helper untuk koleksi per wallet
 const getWalletCollection = (wallet) => collection(db, `airdrops/${wallet}/airdrops`);
+const getWalletRegistryDoc = (wallet) => doc(db, "wallets", wallet);
+const walletMigrationStorageKey = "airdrops_wallet_registry_migrated";
+const normalizeWallets = (items = []) =>
+  Array.from(
+    new Set(
+      items
+        .map((item) => (typeof item === "string" ? item.trim() : ""))
+        .filter(Boolean)
+    )
+  );
 
 const StatusBadge = ({ status }) => {
   const classes = status === "Selesai" ? 'bg-green-100 text-green-800' : status === "Proses" ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
@@ -102,7 +113,7 @@ const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onT
   </motion.div>
 );
 
-const DailyTaskCard = ({ a, darkMode, toggleDailyComplete, isCompletedToday }) => (
+const DailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isCompletedToday }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -139,12 +150,19 @@ function App({ page = "dashboard" }) {
   const [selectedWallet, setSelectedWallet] = useState("All");
   const [newWallet, setNewWallet] = useState("");
   const [loading, setLoading] = useState(false);
+  const [walletSyncError, setWalletSyncError] = useState("");
+  const [airdropSyncError, setAirdropSyncError] = useState("");
+  const [isWalletSyncReady, setIsWalletSyncReady] = useState(false);
   const fileInputRef = useRef(null);
+  const localWalletCacheRef = useRef([]);
+  const walletMigrationStateRef = useRef("idle");
 
   const activeTab = page === "dashboard" ? "All" : page;
   const isAnalytics = page === "analytics";
   const isCategories = page === "categories";
   const isSettings = page === "settings";
+  const syncMessages = [walletSyncError, airdropSyncError].filter(Boolean);
+  const isFirebaseConnected = isWalletSyncReady && syncMessages.length === 0;
 
 
   const [form, setForm] = useState({
@@ -160,32 +178,120 @@ function App({ page = "dashboard" }) {
     lastCompleted: null,
   });
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "wallets"),
+      (snapshot) => {
+        const remoteWallets = normalizeWallets(
+          snapshot.docs.map((walletDoc) => walletDoc.data()?.address || walletDoc.id)
+        );
+
+        let cachedWallets = localWalletCacheRef.current;
+        if (cachedWallets.length === 0) {
+          try {
+            cachedWallets = normalizeWallets(
+              JSON.parse(localStorage.getItem("airdrops_wallets") || "[]")
+            );
+            localWalletCacheRef.current = cachedWallets;
+          } catch {
+            cachedWallets = [];
+          }
+        }
+        const hasMigratedWalletRegistry =
+          localStorage.getItem(walletMigrationStorageKey) === "true";
+        const shouldMigrateLegacyWallets =
+          !hasMigratedWalletRegistry && remoteWallets.length === 0 && cachedWallets.length > 0;
+
+        setWallets(shouldMigrateLegacyWallets ? cachedWallets : remoteWallets);
+        setWalletSyncError("");
+        setIsWalletSyncReady(true);
+
+        if (walletMigrationStateRef.current !== "idle" || !shouldMigrateLegacyWallets) {
+          if (!shouldMigrateLegacyWallets) {
+            walletMigrationStateRef.current = "done";
+            localStorage.setItem(walletMigrationStorageKey, "true");
+          }
+          return;
+        }
+
+        walletMigrationStateRef.current = "running";
+        Promise.all(
+          cachedWallets.map((wallet) =>
+            setDoc(
+              getWalletRegistryDoc(wallet),
+              {
+                address: wallet,
+                createdAt: new Date().toISOString(),
+              },
+              { merge: true }
+            )
+          )
+        )
+          .then(() => {
+            walletMigrationStateRef.current = "done";
+            localStorage.setItem(walletMigrationStorageKey, "true");
+          })
+          .catch((error) => {
+            console.error("Wallet migration error:", error);
+            setWalletSyncError("Daftar wallet belum berhasil dimigrasikan ke Firebase.");
+            walletMigrationStateRef.current = "idle";
+          });
+      },
+      (error) => {
+        console.error("Wallet registry listener error:", error);
+        setWalletSyncError("Gagal memuat daftar wallet dari Firebase. Cache lokal tetap dipakai jika tersedia.");
+        setIsWalletSyncReady(true);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
   // 🔄 realtime per wallet
   useEffect(() => {
+    setAirdropSyncError("");
+
     if (selectedWallet === "All") {
-      // Jika All, gabungkan semua wallet
-      const unsubscribes = wallets.map(wallet => {
-        return onSnapshot(getWalletCollection(wallet), (snapshot) => {
-          const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), wallet }));
-          setAirdrops(prev => {
-            const filtered = prev.filter(a => a.wallet !== wallet);
-            return [...filtered, ...data];
-          });
-        }, (error) => {
-          console.error("Firestore listener error:", error);
-        });
-      });
-      return () => unsubscribes.forEach(unsub => unsub());
-    } else {
-      // Listener untuk wallet tertentu
-      const unsubscribe = onSnapshot(getWalletCollection(selectedWallet), (snapshot) => {
+      if (wallets.length === 0) {
+        setAirdrops([]);
+        return undefined;
+      }
+
+      setAirdrops((prev) => prev.filter((a) => wallets.includes(a.wallet)));
+
+      const unsubscribes = wallets.map((wallet) =>
+        onSnapshot(
+          getWalletCollection(wallet),
+          (snapshot) => {
+            const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), wallet }));
+            setAirdrops((prev) => {
+              const filtered = prev.filter((a) => a.wallet !== wallet);
+              return [...filtered, ...data];
+            });
+          },
+          (error) => {
+            console.error("Firestore listener error:", error);
+            setAirdropSyncError(`Gagal sinkron data wallet ${wallet} dari Firebase.`);
+          }
+        )
+      );
+
+      return () => unsubscribes.forEach((unsub) => unsub());
+    }
+
+    const unsubscribe = onSnapshot(
+      getWalletCollection(selectedWallet),
+      (snapshot) => {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), wallet: selectedWallet }));
         setAirdrops(data);
-      }, (error) => {
+      },
+      (error) => {
         console.error("Firestore listener error:", error);
-      });
-      return unsubscribe;
-    }
+        setAirdropSyncError(`Gagal sinkron data wallet ${selectedWallet} dari Firebase.`);
+      }
+    );
+
+    return unsubscribe;
   }, [selectedWallet, wallets]);
 
   // 🔔 izin notif
@@ -214,9 +320,11 @@ function App({ page = "dashboard" }) {
   
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("airdrops_wallets") || "[]");
-      if (Array.isArray(saved)) setWallets(saved);
+      const saved = normalizeWallets(JSON.parse(localStorage.getItem("airdrops_wallets") || "[]"));
+      localWalletCacheRef.current = saved;
+      if (saved.length > 0) setWallets(saved);
     } catch {
+      localWalletCacheRef.current = [];
       setWallets([]);
     }
     const selected = localStorage.getItem("airdrops_selected_wallet");
@@ -238,25 +346,64 @@ function App({ page = "dashboard" }) {
 
   useEffect(() => {
     localStorage.setItem("airdrops_wallets", JSON.stringify(wallets));
+    localWalletCacheRef.current = wallets;
   }, [wallets]);
 
   useEffect(() => {
     localStorage.setItem("airdrops_selected_wallet", selectedWallet);
   }, [selectedWallet]);
 
-  const addWallet = () => {
+  useEffect(() => {
+    if (!isWalletSyncReady || selectedWallet === "All") {
+      return;
+    }
+
+    if (wallets.length > 0 && !wallets.includes(selectedWallet)) {
+      setSelectedWallet(wallets[0]);
+    }
+
+    if (wallets.length === 0 && walletMigrationStateRef.current === "done") {
+      setSelectedWallet("All");
+    }
+  }, [isWalletSyncReady, selectedWallet, wallets]);
+
+  const addWallet = async () => {
     const address = newWallet.trim();
     if (!address) return;
     if (wallets.includes(address)) {
       alert("Wallet sudah ada");
       return;
     }
-    setWallets((prev) => [...prev, address]);
-    setNewWallet("");
+    try {
+      await setDoc(
+        getWalletRegistryDoc(address),
+        {
+          address,
+          createdAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      setWalletSyncError("");
+      setNewWallet("");
+    } catch (error) {
+      console.error("Error adding wallet:", error);
+      setWalletSyncError("Wallet gagal disimpan ke Firebase.");
+      alert("Wallet gagal disimpan ke Firebase.");
+    }
   };
 
-  const removeWallet = (address) => {
-    setWallets((prev) => prev.filter((w) => w !== address));
+  const removeWallet = async (address) => {
+    try {
+      await deleteDoc(getWalletRegistryDoc(address));
+      setWalletSyncError("");
+      if (selectedWallet === address) {
+        setSelectedWallet("All");
+      }
+    } catch (error) {
+      console.error("Error removing wallet:", error);
+      setWalletSyncError("Wallet gagal dihapus dari Firebase.");
+      alert("Wallet gagal dihapus dari Firebase.");
+    }
   };
 
   // notif deadline
@@ -571,6 +718,13 @@ function App({ page = "dashboard" }) {
               )}
             </div>
           </div>
+          <div className={`mb-6 rounded-xl border px-4 py-3 text-sm ${isFirebaseConnected ? (darkMode ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700') : (darkMode ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-700')}`}>
+            {!isWalletSyncReady && "Menghubungkan aplikasi ke Firebase..."}
+            {isWalletSyncReady && isFirebaseConnected && "Firebase tersambung. Daftar wallet dan airdrop sekarang disinkronkan lintas web dan Android."}
+            {syncMessages.map((message) => (
+              <div key={message}>{message}</div>
+            ))}
+          </div>
           <div className="flex justify-center gap-4 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -740,6 +894,13 @@ function App({ page = "dashboard" }) {
             <div className="flex justify-between items-center mb-4">
               <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🗄️ Backup & Wallet</h2>
               <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{wallets.length} wallet(s) tersimpan</span>
+            </div>
+            <div className={`mb-4 rounded-lg border px-3 py-2 text-sm ${isFirebaseConnected ? (darkMode ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700') : (darkMode ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-700')}`}>
+              {!isWalletSyncReady && "Status Firebase: menghubungkan..."}
+              {isWalletSyncReady && isFirebaseConnected && "Status Firebase: tersambung dan siap sinkron."}
+              {syncMessages.map((message) => (
+                <div key={`settings-${message}`}>{message}</div>
+              ))}
             </div>
             <div className="flex items-center gap-3 mb-4">
               <label className={`${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold`}>Pilih Wallet Aktif:</label>
