@@ -218,8 +218,17 @@ function App({ page = "dashboard" }) {
       setWallets([]);
     }
     const selected = localStorage.getItem("airdrops_selected_wallet");
-    if (selected) setSelectedWallet(selected);
+    if (selected) {
+      setSelectedWallet(selected);
+    }
   }, []);
+
+  // Auto-select first wallet if available and no wallet is selected
+  useEffect(() => {
+    if (wallets.length > 0 && selectedWallet === "All") {
+      setSelectedWallet(wallets[0]);
+    }
+  }, [wallets, selectedWallet]);
 
   useEffect(() => {
     localStorage.setItem("airdrops_wallets", JSON.stringify(wallets));
@@ -536,6 +545,26 @@ function App({ page = "dashboard" }) {
           <p className={`text-lg md:text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
             Kelola airdrop kamu dengan mudah dan efisien {selectedWallet !== "All" ? ` - Wallet: ${selectedWallet}` : " - Semua Wallet"}
           </p>
+          
+          {/* 👛 Wallet Selector - Visible on main header */}
+          <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-slate-800/60 border border-slate-700' : 'bg-white/60 border border-gray-200'}`}>
+            <div className="flex flex-col md:flex-row gap-3 items-center justify-center flex-wrap">
+              <label className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>👛 Pilih Wallet:</label>
+              <select
+                value={selectedWallet}
+                onChange={(e) => setSelectedWallet(e.target.value)}
+                className={`px-4 py-2 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-400' : 'bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400'} focus:outline-none transition-all`}
+              >
+                <option value="All">📋 Semua Wallet (View Only)</option>
+                {wallets.map((w) => (
+                  <option key={w} value={w}>{w}</option>
+                ))}
+              </select>
+              {wallets.length === 0 && (
+                <p className={`text-sm italic ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Belum ada wallet. Tambahkan di Backup menu.</p>
+              )}
+            </div>
+          </div>
           <div className="flex justify-center gap-4 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -587,6 +616,47 @@ function App({ page = "dashboard" }) {
             >Backup</NavLink>
           </div>
         </motion.header>
+
+        {/* ⚠️ Warning: No Wallet Selected or No Wallets */}
+        {wallets.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-orange-100 to-red-100 border border-orange-300 shadow-lg"
+          >
+            <div className="flex items-start gap-3">
+              <ExclamationTriangleIcon className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-bold text-orange-900 mb-1">🔑 Tambah Wallet Terlebih Dahulu</h3>
+                <p className="text-sm text-orange-800 mb-3">Anda belum menambahkan wallet apapun. Tambahkan wallet di menu <strong>Backup</strong> untuk mulai melacak airdrop.</p>
+                <NavLink
+                  to="/settings"
+                  className="inline-block px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-all"
+                >
+                  ➜ Buka Menu Backup
+                </NavLink>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {selectedWallet === "All" && wallets.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-300 shadow-lg"
+          >
+            <div className="flex items-start gap-3">
+              <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-bold text-blue-900 mb-1">📋 Mode Tampilan Semua Wallet</h3>
+                <p className="text-sm text-blue-800">Anda sedang melihat <strong>semua wallet</strong>. Untuk menambah atau mengedit data, silakan pilih wallet spesifik di atas. Data yang ditampilkan adalah read-only.</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Stats Dashboard */}
         <motion.div
