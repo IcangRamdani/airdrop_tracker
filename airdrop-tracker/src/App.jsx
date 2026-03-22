@@ -210,6 +210,8 @@ function App({ page = "dashboard" }) {
   }, [darkMode]);
 
   // 🔐 persistensi multi-wallet
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("airdrops_wallets") || "[]");
@@ -220,15 +222,19 @@ function App({ page = "dashboard" }) {
     const selected = localStorage.getItem("airdrops_selected_wallet");
     if (selected) {
       setSelectedWallet(selected);
+    } else {
+      // Only on first load, if no saved selection, auto-select first wallet if available
+      setIsInitialized(true);
     }
   }, []);
 
-  // Auto-select first wallet if available and no wallet is selected
+  // Auto-select first wallet ONLY on first initialization if no wallet was saved
   useEffect(() => {
-    if (wallets.length > 0 && selectedWallet === "All") {
+    if (isInitialized && wallets.length > 0 && selectedWallet === "All") {
       setSelectedWallet(wallets[0]);
+      setIsInitialized(false);
     }
-  }, [wallets, selectedWallet]);
+  }, [isInitialized, wallets]);
 
   useEffect(() => {
     localStorage.setItem("airdrops_wallets", JSON.stringify(wallets));
