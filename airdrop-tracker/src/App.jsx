@@ -150,7 +150,7 @@ const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onT
         </div>
         {a.deadline && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>📅 {new Date(a.deadline).toLocaleDateString()}</p>}
         {a.wallet && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2 break-all`}>👛 {a.wallet}</p>}
-        {a.link && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>🔗 <a href={a.link} target="_blank" rel="noreferrer" className="underline hover:text-blue-400">{a.link}</a></p>}
+        {a.link && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2 break-all`}>🔗 <a href={a.link} target="_blank" rel="noreferrer" className="break-all underline hover:text-blue-400">{a.link}</a></p>}
         {a.notes && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>📝 {a.notes}</p>}
       </div>
       <div className="flex flex-col gap-2 ml-4">
@@ -241,8 +241,8 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
           </div>
           {a.link && (
             <div className="flex items-start justify-between gap-3">
-              <span className="font-medium">Link</span>
-              <a href={a.link} target="_blank" rel="noreferrer" className={`max-w-[65%] truncate text-right font-medium underline underline-offset-4 ${darkMode ? 'text-cyan-300 decoration-cyan-400/40' : 'text-sky-700 decoration-sky-400/40'}`}>
+              <span className="shrink-0 font-medium">Link</span>
+              <a href={a.link} target="_blank" rel="noreferrer" className={`min-w-0 max-w-[65%] break-all text-right font-medium underline underline-offset-4 ${darkMode ? 'text-cyan-300 decoration-cyan-400/40' : 'text-sky-700 decoration-sky-400/40'}`}>
                 {a.link}
               </a>
             </div>
