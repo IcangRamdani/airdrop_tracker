@@ -89,7 +89,7 @@ const SectionHeading = ({ darkMode, eyebrow, title, description, action }) => (
         </div>
       )}
       <h2 className={`text-2xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>{title}</h2>
-      {description && <p className={`mt-1 text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{description}</p>}
+      {description && <p className={`mt-1 break-words text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{description}</p>}
     </div>
     {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
   </div>
@@ -149,7 +149,7 @@ const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onT
           <FrequencyBadge frequency={a.frequency} />
         </div>
         {a.deadline && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>📅 {new Date(a.deadline).toLocaleDateString()}</p>}
-        {a.wallet && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>👛 {a.wallet}</p>}
+        {a.wallet && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2 break-all`}>👛 {a.wallet}</p>}
         {a.link && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>🔗 <a href={a.link} target="_blank" rel="noreferrer" className="underline hover:text-blue-400">{a.link}</a></p>}
         {a.notes && <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>📝 {a.notes}</p>}
       </div>
@@ -231,9 +231,9 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
             <span className="font-medium">Deadline</span>
             <span>{a.deadline ? formatDisplayDate(a.deadline) : 'Belum diatur'}</span>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-medium">Wallet</span>
-            <span className="truncate text-right">{a.wallet || 'Belum dipilih'}</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 font-medium">Wallet</span>
+            <span className="min-w-0 break-all text-right">{a.wallet || 'Belum dipilih'}</span>
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="font-medium">Kategori</span>
@@ -283,11 +283,11 @@ const PolishedDailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isC
     className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/80' : 'border-white'} rounded-3xl border p-5 shadow-xl backdrop-blur-xl`}
   >
     <div className="flex items-start justify-between gap-4">
-      <div>
+      <div className="min-w-0 flex-1">
         <div className="mb-2 flex flex-wrap gap-2">
           <FrequencyBadge frequency={a.frequency} />
           {a.wallet && (
-            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-white/15 text-white/80' : 'bg-white/70 text-slate-700'}`}>
+            <span className={`max-w-full break-all rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-white/15 text-white/80' : 'bg-white/70 text-slate-700'}`}>
               {a.wallet}
             </span>
           )}
@@ -297,7 +297,7 @@ const PolishedDailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isC
       <button
         onClick={() => toggleDailyComplete(a.id)}
         disabled={readOnly}
-        className={`flex h-11 w-11 items-center justify-center rounded-2xl border-2 transition-all ${
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 transition-all ${
           isCompletedToday(a)
             ? 'border-emerald-400 bg-emerald-500 text-white'
             : darkMode
@@ -878,8 +878,15 @@ function App({ page = "dashboard" }) {
               Airdrop Tracker
             </h1>
           </div>
-          <p className={`text-lg md:text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
-            Kelola airdrop kamu dengan mudah dan efisien {selectedWallet !== "All" ? ` - Wallet: ${selectedWallet}` : " - Semua Wallet"}
+          <p className={`text-lg md:text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6 break-words`}>
+            Kelola airdrop kamu dengan mudah dan efisien{" "}
+            {selectedWallet !== "All" ? (
+              <>
+                - Wallet: <span className="break-all">{selectedWallet}</span>
+              </>
+            ) : (
+              " - Semua Wallet"
+            )}
           </p>
           
           {/* 👛 Wallet Selector - Visible on main header */}
@@ -889,7 +896,7 @@ function App({ page = "dashboard" }) {
               <select
                 value={selectedWallet}
                 onChange={(e) => setSelectedWallet(e.target.value)}
-                className={`px-4 py-2 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-400' : 'bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400'} focus:outline-none transition-all`}
+                className={`w-full max-w-full rounded-lg border px-4 py-2 md:w-auto ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-400' : 'bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400'} focus:outline-none transition-all`}
               >
                 <option value="All">Semua Wallet (lihat saja)</option>
                 {wallets.map((w) => (
@@ -1184,9 +1191,9 @@ function App({ page = "dashboard" }) {
                   </div>
                 )}
                 {wallets.map((address) => (
-                  <div key={address} className={`${mutedPanelClass} flex items-center justify-between rounded-2xl border px-4 py-3 ${darkMode ? 'text-white' : 'text-slate-700'}`}>
-                    <span className="truncate">{address}</span>
-                    <button onClick={() => removeWallet(address)} className="rounded-full px-3 py-1 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/10">
+                  <div key={address} className={`${mutedPanelClass} flex flex-col gap-3 rounded-2xl border px-4 py-3 ${darkMode ? 'text-white' : 'text-slate-700'} sm:flex-row sm:items-center sm:justify-between`}>
+                    <span className="min-w-0 break-all">{address}</span>
+                    <button onClick={() => removeWallet(address)} className="self-start rounded-full px-3 py-1 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/10 sm:self-auto">
                       Hapus
                     </button>
                   </div>
@@ -1490,7 +1497,7 @@ function App({ page = "dashboard" }) {
               </div>
 
               <div className={`${mutedPanelClass} mt-5 rounded-2xl border px-4 py-3 text-sm ${softTextClass}`}>
-                Wallet tujuan: <strong className={darkMode ? 'text-white' : 'text-slate-800'}>{readOnlyMode ? 'Belum dipilih' : selectedWallet}</strong>
+                Wallet tujuan: <strong className={`block break-all pt-1 sm:inline sm:pt-0 ${darkMode ? 'text-white' : 'text-slate-800'}`}>{readOnlyMode ? 'Belum dipilih' : selectedWallet}</strong>
               </div>
 
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
