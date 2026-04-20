@@ -4,4 +4,5 @@
     <string name="title_activity_main">Airdrop Tracker</string>
     <string name="package_name">com.airdroptracker.app</string>
     <string name="custom_url_scheme">com.airdroptracker.app</string>
+    <string name="description">Kelola dan lacak progress airdrop dengan mudah</string>
 </resources>

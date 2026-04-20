@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors - Indigo -->
+    <color name="indigo_50">#eef2ff</color>
+    <color name="indigo_100">#e0e7ff</color>
+    <color name="indigo_200">#c7d2fe</color>
+    <color name="indigo_300">#a5b4fc</color>
+    <color name="indigo_400">#818cf8</color>
+    <color name="indigo_500">#6366f1</color>
+    <color name="indigo_600">#4f46e5</color>
+    <color name="indigo_700">#4338ca</color>
+    <color name="indigo_800">#3730a3</color>
+    <color name="indigo_900">#312e81</color>
+    
+    <!-- Secondary Colors - Purple -->
+    <color name="purple_50">#f5f3ff</color>
+    <color name="purple_100">#ede9fe</color>
+    <color name="purple_200">#ddd6fe</color>
+    <color name="purple_300">#c4b5fd</color>
+    <color name="purple_400">#a78bfa</color>
+    <color name="purple_500">#8b5cf6</color>
+    <color name="purple_600">#7c3aed</color>
+    <color name="purple_700">#6d28d9</color>
+    <color name="purple_800">#5b21b6</color>
+    <color name="purple_900">#4c1d95</color>
+    
+    <!-- Tertiary Colors - Pink -->
+    <color name="pink_50">#fdf2f8</color>
+    <color name="pink_100">#fce7f3</color>
+    <color name="pink_200">#fbcfe8</color>
+    <color name="pink_300">#f9a8d4</color>
+    <color name="pink_400">#f472b6</color>
+    <color name="pink_500">#ec4899</color>
+    <color name="pink_600">#db2777</color>
+    <color name="pink_700">#be185d</color>
+    <color name="pink_800">#9d174d</color>
+    <color name="pink_900">#831843</color>
+    
+    <!-- Neutral Colors - Slate -->
+    <color name="slate_50">#f8fafc</color>
+    <color name="slate_100">#f1f5f9</color>
+    <color name="slate_200">#e2e8f0</color>
+    <color name="slate_300">#cbd5e1</color>
+    <color name="slate_400">#94a3b8</color>
+    <color name="slate_500">#64748b</color>
+    <color name="slate_600">#475569</color>
+    <color name="slate_700">#334155</color>
+    <color name="slate_800">#1e293b</color>
+    <color name="slate_900">#0f172a</color>
+    <color name="slate_950">#020617</color>
+    
+    <!-- Status Colors -->
+    <color name="emerald_50">#ecfdf5</color>
+    <color name="emerald_100">#d1fae5</color>
+    <color name="emerald_400">#34d399</color>
+    <color name="emerald_500">#10b981</color>
+    <color name="emerald_600">#059669</color>
+    
+    <color name="amber_50">#fffbeb</color>
+    <color name="amber_100">#fef3c7</color>
+    <color name="amber_400">#fbbf24</color>
+    <color name="amber_500">#f59e0b</color>
+    <color name="amber_600">#d97706</color>
+    
+    <color name="rose_50">#fff1f2</color>
+    <color name="rose_100">#ffe4e6</color>
+    <color name="rose_400">#fb7185</color>
+    <color name="rose_500">#f43f5e</color>
+    <color name="rose_600">#e11d48</color>
+    
+    <!-- Basic Colors -->
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- Legacy color names for compatibility -->
+    <color name="colorPrimary">@color/indigo_500</color>
+    <color name="colorPrimaryDark">@color/indigo_700</color>
+    <color name="colorAccent">@color/indigo_500</color>
+    <color name="colorPrimaryVariant">@color/indigo_600</color>
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorSecondary">@color/purple_500</color>
+    <color name="colorSecondaryVariant">@color/purple_600</color>
+    <color name="colorOnSecondary">@color/white</color>
+    <color name="colorSurface">@color/white</color>
+    <color name="colorOnSurface">@color/slate_900</color>
+    <color name="colorBackground">@color/slate_50</color>
+    <color name="colorOnBackground">@color/slate_900</color>
+    <color name="colorError">@color/rose_500</color>
+    <color name="colorOnError">@color/white</color>
+</resources>

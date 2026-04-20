@@ -74,22 +74,22 @@ const formatDisplayDate = (value) =>
 
 const SectionCard = ({ darkMode, className = "", children }) => (
   <div
-    className={`${darkMode ? "bg-slate-900/55 border-slate-700/80 shadow-slate-950/30" : "bg-white/85 border-white shadow-slate-200/80"} rounded-3xl border p-5 md:p-6 shadow-xl backdrop-blur-xl ${className}`}
+    className={`${darkMode ? "bg-slate-900/70 border-slate-700/50 shadow-slate-950/40" : "bg-white/90 border-slate-200/60 shadow-slate-200/50"} rounded-2xl border p-5 md:p-6 shadow-xl backdrop-blur-xl ${className}`}
   >
     {children}
   </div>
 );
 
 const SectionHeading = ({ darkMode, eyebrow, title, description, action }) => (
-  <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+  <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
     <div>
       {eyebrow && (
-        <div className={`mb-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${darkMode ? "bg-slate-800 text-cyan-200" : "bg-sky-100 text-sky-700"}`}>
+        <div className={`mb-3 inline-flex items-center rounded-lg px-3 py-1 text-xs font-semibold uppercase tracking-wider ${darkMode ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-50 text-indigo-600"}`}>
           {eyebrow}
         </div>
       )}
-      <h2 className={`text-2xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>{title}</h2>
-      {description && <p className={`mt-1 break-words text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{description}</p>}
+      <h2 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>{title}</h2>
+      {description && <p className={`mt-2 break-words text-sm ${darkMode ? "text-slate-400" : "text-slate-600"}`}>{description}</p>}
     </div>
     {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
   </div>
@@ -97,11 +97,11 @@ const SectionHeading = ({ darkMode, eyebrow, title, description, action }) => (
 
 const ActionIconButton = ({ onClick, title, children, tone = "slate", disabled = false }) => {
   const toneMap = {
-    success: disabled ? "bg-slate-500/30 text-slate-300" : "bg-emerald-500 text-white hover:bg-emerald-400",
-    primary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-sky-500 text-white hover:bg-sky-400",
-    secondary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-violet-500 text-white hover:bg-violet-400",
-    danger: disabled ? "bg-slate-500/30 text-slate-300" : "bg-rose-500 text-white hover:bg-rose-400",
-    slate: disabled ? "bg-slate-500/30 text-slate-300" : "bg-slate-800/80 text-white hover:bg-slate-700",
+    success: disabled ? "bg-slate-500/30 text-slate-300" : "bg-emerald-500/90 text-white hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/30",
+    primary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-indigo-500/90 text-white hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/30",
+    secondary: disabled ? "bg-slate-500/30 text-slate-300" : "bg-violet-500/90 text-white hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/30",
+    danger: disabled ? "bg-slate-500/30 text-slate-300" : "bg-rose-500/90 text-white hover:bg-rose-500 hover:shadow-lg hover:shadow-rose-500/30",
+    slate: disabled ? "bg-slate-500/30 text-slate-300" : "bg-slate-700/80 text-white hover:bg-slate-600 hover:shadow-lg",
   };
 
   return (
@@ -109,7 +109,7 @@ const ActionIconButton = ({ onClick, title, children, tone = "slate", disabled =
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-2xl p-3 transition-all duration-200 ${toneMap[tone]} ${disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5"}`}
+      className={`inline-flex items-center justify-center rounded-xl p-2.5 transition-all duration-200 ${toneMap[tone]} ${disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 active:translate-y-0"}`}
     >
       {children}
     </button>
@@ -117,17 +117,17 @@ const ActionIconButton = ({ onClick, title, children, tone = "slate", disabled =
 };
 
 const StatusBadge = ({ status }) => {
-  const classes = status === "Selesai" ? 'bg-green-100 text-green-800' : status === "Proses" ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
-  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${classes}`}>{status}</span>;
+  const classes = status === "Selesai" ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : status === "Proses" ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-slate-500/15 text-slate-400 border-slate-500/30';
+  return <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${classes}`}>{status}</span>;
 };
 
 const PriorityBadge = ({ priority }) => {
-  const classes = priority === "High" ? 'bg-red-100 text-red-800' : priority === "Low" ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${classes}`}>{priority}</span>;
+  const classes = priority === "High" ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' : priority === "Low" ? 'bg-teal-500/15 text-teal-400 border-teal-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+  return <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${classes}`}>{priority}</span>;
 };
 
 const FrequencyBadge = ({ frequency }) => (
-  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">{frequency}</span>
+  <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-violet-500/15 text-violet-400 border border-violet-500/30">{frequency}</span>
 );
 
 const AirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRemove, onToggleStatus, isCompletedToday, readOnly }) => (
@@ -197,7 +197,7 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.96 }}
     transition={{ duration: 0.25 }}
-    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/80' : 'border-white'} group h-full rounded-3xl border p-5 shadow-xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
+    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/50' : 'border-slate-200/50'} group h-full rounded-2xl border p-5 shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
   >
     <div className="flex h-full flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -207,13 +207,13 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
             <PriorityBadge priority={a.priority} />
             <FrequencyBadge frequency={a.frequency} />
             {isCompletedToday(a) && (
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-emerald-500/15 text-emerald-200' : 'bg-emerald-100 text-emerald-700'}`}>
-                Selesai hari ini
+              <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border-emerald-200'} border`}>
+                ✓ Hari ini
               </span>
             )}
           </div>
-          <h3 className={`truncate text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h3>
-          <p className={`mt-2 text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.task}</p>
+          <h3 className={`truncate text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h3>
+          <p className={`mt-2 text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{a.task}</p>
         </div>
         <ActionIconButton
           onClick={() => onToggleStatus(a.id)}
@@ -225,25 +225,25 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
         </ActionIconButton>
       </div>
 
-      <div className={`${darkMode ? 'bg-slate-950/35 border-white/10 text-slate-300' : 'bg-white/55 border-white/70 text-slate-600'} rounded-2xl border p-4`}>
-        <div className="grid gap-2 text-sm">
+      <div className={`${darkMode ? 'bg-slate-800/50 border-white/5' : 'bg-slate-50 border-slate-200'} rounded-xl border p-3.5`}>
+        <div className="grid gap-2.5 text-sm">
           <div className="flex items-center justify-between gap-3">
-            <span className="font-medium">Deadline</span>
-            <span>{a.deadline ? formatDisplayDate(a.deadline) : 'Belum diatur'}</span>
+            <span className={`font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Deadline</span>
+            <span className={darkMode ? 'text-slate-200' : 'text-slate-700'}>{a.deadline ? formatDisplayDate(a.deadline) : 'Belum diatur'}</span>
           </div>
           <div className="flex items-start justify-between gap-3">
-            <span className="shrink-0 font-medium">Wallet</span>
-            <span className="min-w-0 break-all text-right">{a.wallet || 'Belum dipilih'}</span>
+            <span className={`shrink-0 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Wallet</span>
+            <span className={`min-w-0 break-all text-right ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.wallet || 'Belum dipilih'}</span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="font-medium">Kategori</span>
-            <span>{a.category || 'General'}</span>
+            <span className={`font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Kategori</span>
+            <span className={darkMode ? 'text-slate-200' : 'text-slate-700'}>{a.category || 'General'}</span>
           </div>
           {a.link && (
             <div className="flex items-start justify-between gap-3">
-              <span className="shrink-0 font-medium">Link</span>
-              <a href={a.link} target="_blank" rel="noreferrer" className={`min-w-0 max-w-[65%] break-all text-right font-medium underline underline-offset-4 ${darkMode ? 'text-cyan-300 decoration-cyan-400/40' : 'text-sky-700 decoration-sky-400/40'}`}>
-                {a.link}
+              <span className={`shrink-0 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Link</span>
+              <a href={a.link} target="_blank" rel="noreferrer" className={`min-w-0 max-w-[65%] break-all text-right text-xs font-medium underline underline-offset-2 ${darkMode ? 'text-indigo-300 decoration-indigo-400/50' : 'text-indigo-600 decoration-indigo-400/40'}`}>
+                Buka →
               </a>
             </div>
           )}
@@ -251,13 +251,13 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
       </div>
 
       {a.notes && (
-        <div className={`${darkMode ? 'bg-slate-950/25 border-white/10' : 'bg-white/55 border-white/60'} rounded-2xl border p-4`}>
-          <div className={`mb-1 text-xs font-semibold uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Catatan</div>
-          <p className={`text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.notes}</p>
+        <div className={`${darkMode ? 'bg-slate-800/30 border-white/5' : 'bg-slate-50 border-slate-200'} rounded-xl border p-3.5`}>
+          <div className={`mb-1.5 text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Catatan</div>
+          <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{a.notes}</p>
         </div>
       )}
 
-      <div className="mt-auto grid grid-cols-3 gap-2 sm:grid-cols-4">
+      <div className="mt-auto grid grid-cols-3 gap-2">
         <ActionIconButton onClick={() => onEdit(a)} title="Edit airdrop" tone="primary" disabled={readOnly}>
           <PencilIcon className="h-4 w-4" />
         </ActionIconButton>
@@ -267,9 +267,6 @@ const PolishedAirdropCard = ({ a, darkMode, getColor, onEdit, onDuplicate, onRem
         <ActionIconButton onClick={() => onRemove(a.id)} title="Hapus airdrop" tone="danger" disabled={readOnly}>
           <TrashIcon className="h-4 w-4" />
         </ActionIconButton>
-        <div className={`col-span-3 hidden items-center justify-end text-xs font-medium ${darkMode ? 'text-slate-300' : 'text-slate-600'} sm:flex sm:col-span-1`}>
-          {readOnly ? 'Pilih wallet untuk edit' : 'Siap dikelola'}
-        </div>
       </div>
     </div>
   </motion.div>
@@ -280,42 +277,42 @@ const PolishedDailyTaskCard = ({ a, darkMode, getColor, toggleDailyComplete, isC
     initial={{ opacity: 0, scale: 0.96 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.25 }}
-    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/80' : 'border-white'} rounded-3xl border p-5 shadow-xl backdrop-blur-xl`}
+    className={`${getColor(a, darkMode)} ${darkMode ? 'border-slate-700/50' : 'border-slate-200/50'} rounded-2xl border p-4 shadow-lg backdrop-blur-xl`}
   >
-    <div className="flex items-start justify-between gap-4">
+    <div className="flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex flex-wrap gap-2">
           <FrequencyBadge frequency={a.frequency} />
           {a.wallet && (
-            <span className={`max-w-full break-all rounded-full px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-white/15 text-white/80' : 'bg-white/70 text-slate-700'}`}>
+            <span className={`max-w-full break-all rounded-lg px-2.5 py-1 text-xs font-semibold ${darkMode ? 'bg-white/10 text-white/70 border-white/10' : 'bg-slate-100 text-slate-600 border-slate-200'} border`}>
               {a.wallet}
             </span>
           )}
         </div>
-        <h4 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h4>
+        <h4 className={`text-base font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{a.name}</h4>
       </div>
       <button
         onClick={() => toggleDailyComplete(a.id)}
         disabled={readOnly}
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 transition-all ${
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 transition-all ${
           isCompletedToday(a)
             ? 'border-emerald-400 bg-emerald-500 text-white'
             : darkMode
-              ? 'border-slate-500 text-slate-100 hover:border-emerald-400'
-              : 'border-slate-300 text-slate-600 hover:border-emerald-500'
+              ? 'border-slate-600 text-slate-300 hover:border-emerald-400 hover:bg-emerald-500/20'
+              : 'border-slate-300 text-slate-500 hover:border-emerald-500 hover:bg-emerald-50'
         } ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
       >
-        {isCompletedToday(a) ? <CheckCircleIcon className="h-5 w-5" /> : <CheckCircleIcon className="h-5 w-5 opacity-40" />}
+        {isCompletedToday(a) ? <CheckCircleIcon className="h-5 w-5" /> : <CheckCircleIcon className="h-5 w-5 opacity-30" />}
       </button>
     </div>
-    <div className={`${darkMode ? 'bg-slate-950/25 border-white/10' : 'bg-white/55 border-white/60'} mt-4 rounded-2xl border p-4`}>
-      <p className={`text-sm leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{a.task}</p>
+    <div className={`${darkMode ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'} mt-3 rounded-xl border p-3`}>
+      <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{a.task}</p>
     </div>
-    <div className="mt-4 flex items-center justify-between gap-3">
-      <span className={`text-sm font-semibold ${isCompletedToday(a) ? 'text-emerald-300' : darkMode ? 'text-amber-200' : 'text-orange-600'}`}>
-        {isCompletedToday(a) ? 'Sudah dikerjakan hari ini' : 'Belum dikerjakan hari ini'}
+    <div className="mt-3 flex items-center justify-between gap-3">
+      <span className={`text-xs font-medium ${isCompletedToday(a) ? 'text-emerald-400' : darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+        {isCompletedToday(a) ? '✓ Selesai hari ini' : '⏳ Menunggu'}
       </span>
-      {readOnly && <span className={`text-xs ${darkMode ? 'text-slate-300' : 'text-slate-500'}`}>Pilih wallet untuk update</span>}
+      {readOnly && <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Pilih wallet</span>}
     </div>
   </motion.div>
 );
@@ -899,39 +896,34 @@ function App({ page = "dashboard" }) {
           transition={{ duration: 0.8 }}
           className="text-center mb-8"
         >
-          <div className="flex justify-center items-center gap-4 mb-4">
-            <RocketLaunchIcon className={`w-12 h-12 ${darkMode ? 'text-cyan-300' : 'text-sky-500'}`} />
-            <h1 className={`text-4xl md:text-6xl font-bold bg-gradient-to-r ${darkMode ? 'from-cyan-300 to-indigo-300' : 'from-sky-500 to-violet-500'} bg-clip-text text-transparent`}>
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <div className={`p-2.5 rounded-xl ${darkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'}`}>
+              <RocketLaunchIcon className={`w-8 h-8 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
+            </div>
+            <h1 className={`text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent`}>
               Airdrop Tracker
             </h1>
           </div>
-          <p className={`text-lg md:text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6 break-words`}>
-            Kelola airdrop kamu dengan mudah dan efisien{" "}
-            {selectedWallet !== "All" ? (
-              <>
-                - Wallet: <span className="break-all">{selectedWallet}</span>
-              </>
-            ) : (
-              " - Semua Wallet"
-            )}
+          <p className={`text-base md:text-lg ${darkMode ? 'text-slate-400' : 'text-slate-600'} mb-6 max-w-2xl mx-auto`}>
+            Kelola dan lacak progress airdrop dengan mudah dan efisien
           </p>
           
-          {/* 👛 Wallet Selector - Visible on main header */}
-          <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-slate-800/60 border border-slate-700' : 'bg-white/60 border border-gray-200'}`}>
+          {/* 👛 Wallet Selector */}
+          <div className={`mb-5 p-4 rounded-xl ${darkMode ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white/80 border border-slate-200/60'} shadow-lg backdrop-blur-sm`}>
             <div className="flex flex-col md:flex-row gap-3 items-center justify-center flex-wrap">
-              <label className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Wallet Aktif:</label>
+              <label className={`font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>Wallet Aktif:</label>
               <select
                 value={selectedWallet}
                 onChange={(e) => setSelectedWallet(e.target.value)}
-                className={`w-full max-w-full rounded-lg border px-4 py-2 md:w-auto ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-400' : 'bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400'} focus:outline-none transition-all`}
+                className={`w-full max-w-full rounded-lg border px-4 py-2.5 md:w-auto ${darkMode ? 'bg-slate-700/80 border-slate-600 text-slate-200 focus:ring-2 focus:ring-indigo-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-indigo-400'} focus:outline-none transition-all text-sm`}
               >
-                <option value="All">Semua Wallet (lihat saja)</option>
+                <option value="All">Semua Wallet</option>
                 {wallets.map((w) => (
-                  <option key={w} value={w}>{w}</option>
+                  <option key={w} value={w}>{w.slice(0, 10)}...{w.slice(-6)}</option>
                 ))}
               </select>
               {wallets.length === 0 && (
-                <p className={`text-sm italic ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Belum ada wallet. Tambahkan di Backup menu.</p>
+                <p className={`text-sm ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Belum ada wallet. Tambahkan di menu Backup.</p>
               )}
             </div>
           </div>
@@ -939,17 +931,19 @@ function App({ page = "dashboard" }) {
             {!isWalletSyncReady && "Menghubungkan aplikasi ke Firebase..."}
             {isWalletSyncReady && isFirebaseConnected && "Firebase tersambung. Daftar wallet dan airdrop sekarang disinkronkan lintas web dan Android."}
             {syncMessages.map((message) => (
-              <div key={message}>{message}</div>
+              <span key={message}>{message}</span>
             ))}
           </div>
-          <div className="flex justify-center gap-4 flex-wrap">
+          
+          {/* Navigation */}
+          <div className="flex justify-center gap-2 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-3 rounded-full ${darkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:bg-orange-50'} shadow-lg transition-all duration-300 hover:scale-110`}
+              className={`p-2.5 rounded-xl ${darkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:bg-slate-50'} shadow-md transition-all border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >
-              {darkMode ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-600" />}
+              {darkMode ? <SunIcon className="w-5 h-5 text-amber-400" /> : <MoonIcon className="w-5 h-5 text-slate-600" />}
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -961,41 +955,41 @@ function App({ page = "dashboard" }) {
               }}
               disabled={readOnlyMode}
               title={readOnlyMode ? "Pilih wallet spesifik untuk menambah airdrop" : "Tambah airdrop"}
-              className={`p-3 rounded-full shadow-lg transition-all duration-300 ${readOnlyMode ? 'bg-slate-400 text-white cursor-not-allowed opacity-60' : 'bg-gradient-to-r from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 text-white hover:scale-110'}`}
+              className={`p-2.5 rounded-xl shadow-md transition-all ${readOnlyMode ? 'bg-slate-400 text-white/70 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white'}`}
             >
-              <PlusIcon className="w-6 h-6" />
+              <PlusIcon className="w-5 h-5" />
             </motion.button>
             <NavLink
               to="/"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Dashboard</NavLink>
             <NavLink
               to="/daily"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Daily</NavLink>
             <NavLink
               to="/weekly"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Weekly</NavLink>
             <NavLink
               to="/completed"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Selesai</NavLink>
             <NavLink
               to="/upcoming"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Upcoming</NavLink>
             <NavLink
               to="/analytics"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Analytics</NavLink>
             <NavLink
               to="/categories"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
-            >Categories</NavLink>
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
+            >Kategori</NavLink>
             <NavLink
               to="/settings"
-              className={({ isActive }) => `px-3 py-2 rounded-xl text-sm font-semibold ${isActive ? 'bg-sky-500 text-white' : 'bg-white/60 text-gray-700'} transition-all`}
+              className={({ isActive }) => `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? (darkMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 hover:bg-slate-50')} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}
             >Backup</NavLink>
           </div>
         </motion.header>
@@ -1005,21 +999,21 @@ function App({ page = "dashboard" }) {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-orange-100 to-red-100 border border-orange-300 shadow-lg"
+            transition={{ duration: 0.4 }}
+            className="mb-5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"
           >
-            <div className="flex items-start gap-3">
-              <ExclamationTriangleIcon className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+            <div className="flex items-center gap-3">
+              <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="font-bold text-orange-900 mb-1">Tambahkan wallet terlebih dahulu</h3>
-                <p className="text-sm text-orange-800 mb-3">Anda belum menambahkan wallet apapun. Tambahkan wallet di menu <strong>Backup</strong> untuk mulai melacak airdrop.</p>
-                <NavLink
-                  to="/settings"
-                  className="inline-block px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-all"
-                >
-                  Buka Backup
-                </NavLink>
+                <h3 className={`font-semibold text-sm ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>Belum ada wallet</h3>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-amber-300/70' : 'text-amber-600/70'}`}>Tambahkan wallet di menu Backup untuk mulai melacak airdrop.</p>
               </div>
+              <NavLink
+                to="/settings"
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-all"
+              >
+                Buka
+              </NavLink>
             </div>
           </motion.div>
         )}
@@ -1028,15 +1022,12 @@ function App({ page = "dashboard" }) {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-300 shadow-lg"
+            transition={{ duration: 0.4 }}
+            className="mb-5 p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20"
           >
-            <div className="flex items-start gap-3">
-              <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-bold text-blue-900 mb-1">Tampilan semua wallet</h3>
-                <p className="text-sm text-blue-800">Anda sedang melihat <strong>semua wallet</strong>. Untuk menambah atau mengedit data, silakan pilih wallet spesifik di atas. Data yang ditampilkan adalah read-only.</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <ExclamationTriangleIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <p className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>Mode baca saja. Pilih wallet spesifik untuk edit data.</p>
             </div>
           </motion.div>
         )}
@@ -1045,40 +1036,41 @@ function App({ page = "dashboard" }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
         >
           {[
             { label: "Total", value: stats.total, icon: ChartBarIcon, color: "from-blue-500 to-indigo-600" },
-            { label: "Selesai", value: stats.completed, icon: CheckCircleIcon, color: "from-green-500 to-teal-600" },
-            { label: "Proses", value: stats.inProgress, icon: ClockIcon, color: "from-yellow-500 to-orange-600" },
-            { label: "Daily Done", value: `${stats.dailyCompleted}/${stats.dailyTasks}`, icon: CalendarIcon, color: "from-purple-500 to-pink-600" },
+            { label: "Selesai", value: stats.completed, icon: CheckCircleIcon, color: "from-emerald-500 to-teal-600" },
+            { label: "Proses", value: stats.inProgress, icon: ClockIcon, color: "from-amber-500 to-orange-600" },
+            { label: "Daily", value: `${stats.dailyCompleted}/${stats.dailyTasks}`, icon: CalendarIcon, color: "from-violet-500 to-purple-600" },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`${darkMode ? 'bg-slate-900/55 border-slate-700/80' : 'bg-white/85 border-white'} flex items-start gap-3 rounded-3xl border p-4 shadow-xl backdrop-blur-xl`}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className={`${darkMode ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white/90 border-slate-200/60'} flex items-center gap-3 rounded-2xl border p-3.5 shadow-lg backdrop-blur-sm`}
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r ${stat.color}`}>
-                <stat.icon className="h-6 w-6 text-white" />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r ${stat.color}`}>
+                <stat.icon className="h-5 w-5 text-white" />
               </div>
               <div>
-                <div className={`text-sm font-medium uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</div>
-                <div className={`mt-1 text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{stat.value}</div>
+                <div className={`text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{stat.label}</div>
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{stat.value}</div>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        <div className={`mb-8 p-5 rounded-3xl ${darkMode ? 'bg-slate-900/55 border border-slate-700/80' : 'bg-white/85 border border-white'} shadow-xl backdrop-blur-xl`}>
+        {/* Progress Bar */}
+        <div className={`mb-6 p-4 rounded-2xl ${darkMode ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white/90 border border-slate-200/60'} shadow-lg backdrop-blur-sm`}>
           <div className="flex items-center justify-between mb-2">
-            <div className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Kekuatan Pencapaian</div>
-            <div className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{stats.completionRate}% progress</div>
+            <div className={`text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Progress Keseluruhan</div>
+            <div className={`text-sm font-bold ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{stats.completionRate}%</div>
           </div>
-          <div className={`w-full h-2 rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
-            <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-teal-500 transition-all duration-500 ease-out" style={{ width: `${stats.completionRate}%` }} />
+          <div className={`w-full h-2.5 rounded-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}>
+            <div className="h-2.5 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500 ease-out" style={{ width: `${stats.completionRate}%` }} />
           </div>
         </div>
 
@@ -1271,44 +1263,41 @@ function App({ page = "dashboard" }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className={`${darkMode ? 'bg-slate-900/50 border-slate-700/80' : 'bg-white/85 border-white'} mb-8 rounded-3xl border p-4 md:p-5 shadow-xl backdrop-blur-xl`}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className={`${darkMode ? 'bg-slate-800/40 border-slate-700/50' : 'bg-white/90 border-slate-200/60'} mb-6 rounded-2xl border p-4 shadow-lg backdrop-blur-sm`}
         >
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className={`mb-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${darkMode ? 'bg-slate-800 text-cyan-200' : 'bg-sky-100 text-sky-700'}`}>
-                <FunnelIcon className="h-4 w-4" />
-                Filter Panel
+              <div className={`mb-2 inline-flex items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-medium ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`}>
+                <FunnelIcon className="h-3.5 w-3.5" />
+                Filter
               </div>
-              <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Cari dan rapikan daftar airdrop</h2>
-              <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Semua kontrol pencarian, status, prioritas, dan urutan ada di satu tempat.</p>
+              <h2 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Cari & Filter</h2>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-3 py-2 text-sm font-semibold ${darkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'}`}>
+              <span className={`rounded-lg px-2.5 py-1.5 text-xs font-medium ${darkMode ? 'bg-slate-700/80 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
                 {filteredAirdrops.length} hasil
               </span>
-              <span className={`rounded-full px-3 py-2 text-sm ${darkMode ? 'bg-slate-800/80 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                Urut: {sortBy === "deadline" ? "Deadline" : sortBy === "priority" ? "Prioritas" : "Nama"} {sortOrder === "asc" ? "naik" : "turun"}
-              </span>
-              <button
-                onClick={resetControls}
-                disabled={!hasActiveFilters}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${hasActiveFilters ? (darkMode ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-sky-500 text-white hover:bg-sky-600') : (darkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400')}`}
-              >
-                <ArrowPathIcon className="h-4 w-4" />
-                Reset
-              </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={resetControls}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${darkMode ? 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/30' : 'bg-rose-100 text-rose-600 hover:bg-rose-200'}`}
+                >
+                  <ArrowPathIcon className="h-3.5 w-3.5" />
+                  Reset
+                </button>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
             <div className="relative md:col-span-2 xl:col-span-2">
-              <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Cari nama airdrop atau task..."
+                placeholder="Cari airdrop..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`${fieldClass} pl-11`}
+                className={`${fieldClass} pl-10`}
               />
             </div>
             <select
@@ -1316,7 +1305,7 @@ function App({ page = "dashboard" }) {
               onChange={(e) => setFilterStatus(e.target.value)}
               className={fieldClass}
             >
-              <option value="All">Semua Status</option>
+              <option value="All">Status</option>
               <option value="Belum">Belum</option>
               <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
@@ -1326,12 +1315,12 @@ function App({ page = "dashboard" }) {
               onChange={(e) => setFilterPriority(e.target.value)}
               className={fieldClass}
             >
-              <option value="All">Semua Prioritas</option>
+              <option value="All">Prioritas</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
             </select>
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -1346,8 +1335,8 @@ function App({ page = "dashboard" }) {
                 onChange={(e) => setSortOrder(e.target.value)}
                 className={fieldClass}
               >
-                <option value="asc">Naik</option>
-                <option value="desc">Turun</option>
+                <option value="asc">↑</option>
+                <option value="desc">↓</option>
               </select>
             </div>
           </div>
@@ -1379,18 +1368,20 @@ function App({ page = "dashboard" }) {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`${darkMode ? 'bg-slate-900/55 border-slate-700 text-slate-300' : 'bg-white/80 border-slate-200 text-slate-600'} mt-6 rounded-3xl border border-dashed p-8 text-center shadow-lg`}
+            className={`${darkMode ? 'bg-slate-800/30 border-slate-700/50' : 'bg-white/80 border-slate-200/60'} mt-5 rounded-2xl border border-dashed p-6 text-center shadow-sm`}
           >
-            <FunnelIcon className="mx-auto mb-3 h-10 w-10 opacity-60" />
-            <h3 className={`mb-2 text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Belum ada hasil yang cocok</h3>
-            <p className="mb-4 text-sm">Coba longgarkan pencarian atau reset filter untuk menampilkan semua airdrop lagi.</p>
-            <button
-              onClick={resetControls}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-sky-500 text-white hover:bg-sky-600'}`}
-            >
-              <ArrowPathIcon className="h-4 w-4" />
-              Reset Filter
-            </button>
+            <FunnelIcon className="mx-auto mb-2 h-8 w-8 opacity-50" />
+            <h3 className={`mb-1 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Tidak ada hasil</h3>
+            <p className="text-xs text-slate-500">Coba reset filter untuk menampilkan semua data.</p>
+            {hasActiveFilters && (
+              <button
+                onClick={resetControls}
+                className={`mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${darkMode ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'}`}
+              >
+                <ArrowPathIcon className="h-3.5 w-3.5" />
+                Reset
+              </button>
+            )}
           </motion.div>
         )}
       </div>
@@ -1406,22 +1397,25 @@ function App({ page = "dashboard" }) {
             onClick={closeForm}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className={`${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] border p-5 shadow-2xl md:p-8`}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border p-5 shadow-2xl`}
               onClick={(e) => e.stopPropagation()}
             >
-              <SectionHeading
-                darkMode={darkMode}
-                eyebrow={editingId ? "Edit Mode" : "Airdrop Baru"}
-                title={editingId ? "Perbarui detail airdrop" : "Tambah airdrop baru"}
-                description={readOnlyMode ? "Pilih wallet spesifik lebih dulu agar data bisa disimpan ke Firebase." : `Data akan disimpan ke wallet ${selectedWallet}.`}
-              />
+              <div className="mb-5">
+                <div className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium mb-3 ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`}>
+                  {editingId ? '✏️ Edit' : '✨ Baru'}
+                </div>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{editingId ? 'Edit Airdrop' : 'Tambah Airdrop'}</h2>
+                <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  {readOnlyMode ? 'Pilih wallet terlebih dahulu' : `Disimpan ke: ${selectedWallet}`}
+                </p>
+              </div>
 
               {readOnlyMode && (
-                <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  Mode semua wallet bersifat read-only. Pilih wallet spesifik di header atau menu backup sebelum menambah atau mengedit data.
+                <div className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-300">
+                  Mode baca saja. Pilih wallet spesifik untuk menyimpan data.
                 </div>
               )}
 
@@ -1523,24 +1517,24 @@ function App({ page = "dashboard" }) {
                 </div>
               </div>
 
-              <div className={`${mutedPanelClass} mt-5 rounded-2xl border px-4 py-3 text-sm ${softTextClass}`}>
-                Wallet tujuan: <strong className={`block break-all pt-1 sm:inline sm:pt-0 ${darkMode ? 'text-white' : 'text-slate-800'}`}>{readOnlyMode ? 'Belum dipilih' : selectedWallet}</strong>
+              <div className={`${mutedPanelClass} mt-4 rounded-xl border px-3 py-2.5 text-xs ${softTextClass}`}>
+                Wallet: <span className={`font-medium ${darkMode ? 'text-white' : 'text-slate-800'}`}>{readOnlyMode ? 'Belum dipilih' : selectedWallet}</span>
               </div>
 
-              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <button
                   onClick={closeForm}
-                  className={`${darkMode ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} rounded-2xl px-5 py-3 font-semibold transition-all duration-200`}
+                  className={`${darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200`}
                 >
-                  Tutup
+                  Batal
                 </button>
                 <button
                   onClick={editingId ? edit : add}
                   disabled={isFormBlocked}
-                  className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-bold text-white transition-all duration-300 ${isFormBlocked ? 'cursor-not-allowed bg-slate-400 opacity-70' : 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 hover:-translate-y-0.5'}`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${isFormBlocked ? 'cursor-not-allowed bg-slate-400 opacity-60' : 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 hover:-translate-y-0.5'}`}
                 >
-                  <PlusIcon className="w-5 h-5" />
-                  {loading ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Tambah Airdrop'}
+                  <PlusIcon className="w-4 h-4" />
+                  {loading ? 'Menyimpan...' : editingId ? 'Simpan' : 'Tambah'}
                 </button>
               </div>
             </motion.div>

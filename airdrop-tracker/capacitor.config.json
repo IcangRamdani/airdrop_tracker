@@ -7,7 +7,12 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 0
+      "launchShowDuration": 2000,
+      "launchBackgroundColor": "#6366f1",
+      "launchFadeOutDuration": 300,
+      "androidSplashResourceName": "splash",
+      "androidSplashTheme": "@style/AppTheme.NoActionBarLaunch",
+      "showSplashScreenSpinner": false
     }
   }
 }

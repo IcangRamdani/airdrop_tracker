@@ -1,22 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <!-- Base application theme - Modern Material Design 3 -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color - Indigo -->
+        <item name="colorPrimary">@color/indigo_500</item>
+        <item name="colorPrimaryDark">@color/indigo_700</item>
+        <item name="colorPrimaryContainer">@color/indigo_100</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimaryContainer">@color/indigo_900</item>
+        
+        <!-- Secondary color - Purple -->
+        <item name="colorSecondary">@color/purple_500</item>
+        <item name="colorSecondaryContainer">@color/purple_100</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnSecondaryContainer">@color/purple_900</item>
+        
+        <!-- Tertiary color - Pink -->
+        <item name="colorTertiary">@color/pink_500</item>
+        <item name="colorTertiaryContainer">@color/pink_100</item>
+        
+        <!-- Background and surface -->
+        <item name="android:colorBackground">@color/slate_50</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/slate_100</item>
+        <item name="colorOnSurface">@color/slate_900</item>
+        <item name="colorOnSurfaceVariant">@color/slate_600</item>
+        
+        <!-- Error colors -->
+        <item name="colorError">@color/rose_500</item>
+        <item name="colorOnError">@color/white</item>
+        
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/indigo_600</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Accent color -->
+        <item name="colorAccent">@color/indigo_500</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <!-- No Action Bar Theme -->
+    <style name="AppTheme.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <item name="android:statusBarColor">@color/indigo_600</item>
+        <item name="android:navigationBarColor">@color/white</item>
     </style>
 
-
+    <!-- Splash Screen Theme -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/indigo_600</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
     </style>
 </resources>
